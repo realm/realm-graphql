@@ -1,51 +1,31 @@
 {
+  "extends": [
+    "tslint:latest",
+    "tslint-eslint-rules"
+  ],
   "rules": {
-    "class-name": true,
-    "comment-format": [
+    "object-literal-sort-keys": false,
+    "jsx-boolean-value": false,
+    "jsx-no-lambda": false,
+    "no-submodule-imports": [
       true,
-      "check-space"
+      "apollo-client"
     ],
-    "indent": [
+    "no-implicit-dependencies": [
       true,
-      "spaces"
+      "dev"
     ],
-    "no-duplicate-variable": true,
-    "no-eval": true,
-    "no-internal-module": true,
-    "no-var-keyword": true,
-    "one-line": [
+    "quotemark": [
       true,
-      "check-open-brace",
-      "check-whitespace"
+      "single"
     ],
-    "semicolon": [false],
-    "triple-equals": [
+    "trailing-comma": {
+      "multiline": "never",
+      "singleline": "never"
+    },
+    "interface-name": [
       true,
-      "allow-null-check"
-    ],
-    "typedef-whitespace": [
-      true,
-      {
-        "call-signature": "nospace",
-        "index-signature": "nospace",
-        "parameter": "nospace",
-        "property-declaration": "nospace",
-        "variable-declaration": "nospace"
-      }
-    ],
-    "variable-name": [
-      true,
-      "ban-keywords"
-    ],
-    "whitespace": [
-      true,
-      "check-branch",
-      "check-decl",
-      "check-operator",
-      "check-separator",
-      "check-type"
-    ],
-    "no-unused-variable": false,
-    "no-unused-expression": false
+      "never-prefix"
+    ]
   }
 }
