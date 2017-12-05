@@ -15,7 +15,7 @@ export class User {
   /**
    * Returns true if this user is an administrator.
    */
-  public isAdmin: string;
+  public isAdmin: boolean;
 
   /**
    * Gets the server URL that was used for authentication.
@@ -27,5 +27,4 @@ export class User {
    * Realm Object Server and should be treated as sensitive data.
    */
   public token: string;
-
 }

@@ -64,6 +64,13 @@ export class Credentials {
     };
   }
 
+  public static Admin(adminToken: string): Credentials {
+    return {
+      data: adminToken,
+      provider: '__admin'
+    };
+  }
+
   public data: string;
   public provider: string;
 

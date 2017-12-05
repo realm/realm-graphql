@@ -3,7 +3,7 @@ import * as URI from 'urijs';
 import { Credentials } from './credentials';
 import { User } from './user';
 
-interface AccessToken {
+export interface AccessToken {
   token: string;
   expires: Date;
 }
@@ -15,6 +15,21 @@ export class AuthenticationHelper {
       throw new Error(`The server scheme must be 'http(s)'. Got: ${authUri.scheme()} `);
     }
 
+    // Admin token, just return a fake user
+    if (credentials.provider === '__admin') {
+      const result: User = {
+        identity: '__admin',
+        isAdmin: true,
+        server,
+        token: credentials.data
+      };
+
+      // Hack: mark the user as token user to short-circuit token refreshes.
+      (result as any).isTokenUser = true;
+
+      return result;
+    }
+
     (credentials as any).app_id = '';
     const options = {
       method: 'POST',
@@ -23,7 +38,7 @@ export class AuthenticationHelper {
       open_timeout: 5000
     };
 
-    const response = await AuthenticationHelper.performFetch(authUri.toString(), options);
+    const response = await AuthenticationHelper.fetch(authUri.toString(), options);
     const body = await response.json();
     if (response.status !== 200) {
       throw {
@@ -42,9 +57,16 @@ export class AuthenticationHelper {
     }
   }
 
-  public static async refreshAccessToken(user: User, realmPath: string) {
+  public static async refreshAccessToken(user: User, realmPath: string): Promise<AccessToken> {
     if (!user.server) {
       throw new Error('Server for user must be specified');
+    }
+
+    if ((user as any).isTokenUser) {
+      return {
+        token: user.token,
+        expires: null // It doesn't expire
+      };
     }
 
     const options = {
@@ -63,7 +85,7 @@ export class AuthenticationHelper {
 
     const authUri = new URI(user.server).path('/auth');
 
-    const response = await AuthenticationHelper.performFetch(authUri, options);
+    const response = await AuthenticationHelper.fetch(authUri, options);
     const body = await response.json();
 
     if (response.status !== 200) {
@@ -81,8 +103,13 @@ export class AuthenticationHelper {
     };
   }
 
+  public static getFetch() {
+    return this.fetch;
+  }
+
   private static requireMethod = require;
-  private static performFetch = typeof fetch === 'undefined' ? AuthenticationHelper.nodeRequire('node-fetch') : fetch;
+  private static fetch = typeof fetch === 'undefined' ? AuthenticationHelper.nodeRequire('node-fetch') : fetch;
+
   private static postHeaders = {
     'content-type': 'application/json;charset=utf-8',
     'accept': 'application/json'

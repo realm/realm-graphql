@@ -6,6 +6,7 @@ import { setContext } from 'apollo-link-context';
 import { createHttpLink, } from 'apollo-link-http';
 import { WebSocketLink } from 'apollo-link-ws';
 import { getMainDefinition } from 'apollo-utilities';
+import { SubscriptionClient } from 'subscriptions-transport-ws';
 import * as URI from 'urijs';
 import { AuthenticationHelper } from './authenticationHelper';
 import { User } from './user';
@@ -18,10 +19,17 @@ export interface ClientConfig {
   connectToDevTools?: boolean;
   queryDeduplication?: boolean;
   defaultOptions?: DefaultOptions;
+
+  /**
+   * WebSocket implementation to provide to the subscription client.
+   * Use this when your environment does not have a built-in native
+   * WebSocket (for example, with NodeJS client).
+   */
+  webSocketImpl?: any;
 }
 
 export class RealmClient extends ApolloClient<NormalizedCacheObject> {
-  public static async Create(config: ClientConfig): Promise<RealmClient> {
+  public static async create(config: ClientConfig): Promise<RealmClient> {
     const accessToken = await AuthenticationHelper.refreshAccessToken(config.user, config.realmPath);
     return new RealmClient(config, accessToken.token);
   }
@@ -34,6 +42,7 @@ export class RealmClient extends ApolloClient<NormalizedCacheObject> {
 
     const httpLink = createHttpLink({
       uri: endpoint.toString(),
+      fetch: AuthenticationHelper.getFetch()
     });
 
     const authLink = setContext((_, { headers }) => {
@@ -45,15 +54,29 @@ export class RealmClient extends ApolloClient<NormalizedCacheObject> {
       };
     });
 
-    // TODO: investigate how this works and what happens on token expiration
-    const subscriptionLink = new WebSocketLink({
-      uri: endpoint.clone().scheme('ws').toString(),
-      options: {
-        connectionParams: {
-          token: accessToken
-        }
-      }
-    });
+    let subscriptionScheme: string;
+    switch (endpoint.scheme()) {
+      case 'http':
+        subscriptionScheme = 'ws';
+        break;
+      case 'https':
+        subscriptionScheme = 'wss';
+        break;
+      default:
+        throw new Error(`Unrecognized scheme for the server endpoint: ${endpoint.scheme()}`);
+    }
+
+    const subscriptionClient = new SubscriptionClient(endpoint.clone().scheme(subscriptionScheme).toString(), {
+      connectionParams: () => {
+        return {
+          token: this.accessToken
+        };
+      },
+      reconnect: true,
+      lazy: true
+    }, config.webSocketImpl);
+
+    const subscriptionLink = new WebSocketLink(subscriptionClient);
 
     const link = split(({ query }) => {
         const { kind, operation } = getMainDefinition(query);

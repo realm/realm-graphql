@@ -14,7 +14,9 @@
                 "--opts", "./tests/mocha.opts"
             ],
             "cwd": "${workspaceRoot}",
-            "protocol": "inspector"
+            "protocol": "inspector",
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "name": "Current Test File",
