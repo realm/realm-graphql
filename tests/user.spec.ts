@@ -3,22 +3,13 @@ import { Credentials, User } from '../src';
 import { generateFakeDataRealm } from './generate-fake-data';
 import { GraphQLTestServer } from './GraphQLTestServer';
 import { AuthenticationHelper } from '../src/authenticationHelper';
+import { testServer } from './common';
+import { v4 } from 'uuid';
 
 describe('User', function() {
 
-  let testServer: GraphQLTestServer;
-
-  before(async () => {
-    testServer = new GraphQLTestServer();
-    await testServer.start();
-  });
-
-  after(async () => {
-    await testServer.shutdown();
-  });
-
   it('should authenticate with username/password', async () => {
-    const credentials = Credentials.UsernamePassword('a@a', 'a', true);
+    const credentials = Credentials.UsernamePassword(v4(), 'a', true);
     const user = await User.authenticate(`http://${testServer.address}`, credentials);
 
     expect(user.token).to.be.not.empty;
@@ -26,7 +17,7 @@ describe('User', function() {
 
   describe('logout', () => {
     it('should invalidate token', async () => {
-      const credentials = Credentials.UsernamePassword('b@b', 'b', true);
+      const credentials = Credentials.UsernamePassword(v4(), 'b', true);
       const user = await User.authenticate(`http://${testServer.address}`, credentials);
 
       const oldToken = user.token;

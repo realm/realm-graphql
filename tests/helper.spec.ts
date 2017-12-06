@@ -21,34 +21,35 @@ import { getMainDefinition } from 'apollo-utilities';
 import { ApolloClient } from 'apollo-client';
 import { NormalizedCacheObject, InMemoryCache } from 'apollo-cache-inmemory';
 import { from } from 'apollo-link';
+import { testServer } from './common';
+import { v4 } from 'uuid';
 
 describe('RealmHelper', function() {
   const companyCount = 200;
 
-  let testServer: GraphQLTestServer;
+  const userId = v4();
+
   let realmUser: Realm.Sync.User;
   let testRealm: Realm;
+  let firstCompanyNameLetter: string;
+  let lastCompanyNameLetter: string;
 
   let helper: RealmHelper;
 
   before(async () => {
-    testServer = new GraphQLTestServer();
-    await testServer.start();
-    realmUser = await Realm.Sync.User.register(`http://${testServer.address}`, 'a@a', 'a');
+    realmUser = await Realm.Sync.User.register(`http://${testServer.address}`, userId, 'a');
     testRealm = await generateFakeDataRealm(true, `realm://${testServer.address}/${realmUser.identity}/test`, realmUser);
+    firstCompanyNameLetter = testRealm.objects<Company>('Company').sorted('name')[0].name.toUpperCase()[0];
+    lastCompanyNameLetter = testRealm.objects<Company>('Company').sorted('name', true)[0].name.toUpperCase()[0];
 
     // Setup the apollo client
-    const credentials = Credentials.UsernamePassword('a@a', 'a');
+    const credentials = Credentials.UsernamePassword(userId, 'a');
     const user = await User.authenticate(`http://${testServer.address}`, credentials);
     helper = await RealmHelper.create({ 
       user,
       realmPath: `/${realmUser.identity}/test`
     });
   });  
-
-  after(async () => {
-    await testServer.shutdown();
-  });
 
   it('should have some fake data', () => {
     const numberOfCompanies = testRealm.objects('Company').length;
@@ -141,10 +142,10 @@ describe('RealmHelper', function() {
 
       describe('when NSPredicate query provided', () => {
         it('should return filtered results', async () => {
-          const companies = await queryFunc(`(query: "name BEGINSWITH[c] 'a'")`);
+          const companies = await queryFunc(`(query: "name BEGINSWITH[c] '${firstCompanyNameLetter}'")`);
           
           for (const company of companies) {
-            expect(company.name.toUpperCase()).to.startWith('A');
+            expect(company.name.toUpperCase()).to.startWith(firstCompanyNameLetter);
           }
         });
       });
@@ -152,12 +153,14 @@ describe('RealmHelper', function() {
       describe('when sortBy specified', () => {
         it('should return sorted results', async () => {
           const companies = await queryFunc(`(sortBy: "name")`);
-  
-          (expect(companies) as any).to.be.sorted((prev: Company, next: Company) => {
-            return prev.name.toUpperCase().localeCompare(next.name.toUpperCase());
-          });
 
-          expect(companies[0].name.toUpperCase()).to.startWith('A');
+          let expected = companies.slice(0).sort((prev, next) => prev.name.toUpperCase().localeCompare(next.name.toUpperCase()));
+
+          for (let i = 0; i < companies.length; i++) {
+            expect(companies[i].name).to.be.equal(expected[i].name);
+          }
+
+          expect(companies[0].name.toUpperCase()).to.startWith(firstCompanyNameLetter);
         });
       });
 
@@ -165,11 +168,13 @@ describe('RealmHelper', function() {
         it('should return results sorted descending', async () => {
           const companies = await queryFunc(`(sortBy: "name", descending: true)`);
           
-          (expect(companies) as any).to.be.sorted((prev: Company, next: Company) => {
-            return next.name.toUpperCase().localeCompare(prev.name.toUpperCase());
-          });
+          let expected = companies.slice(0).sort((prev, next) => next.name.toUpperCase().localeCompare(prev.name.toUpperCase()));
+          
+          for (let i = 0; i < companies.length; i++) {
+            expect(companies[i].name).to.be.equal(expected[i].name);
+          }
 
-          expect(companies[0].name.toUpperCase()).to.startWith('Z');
+          expect(companies[0].name.toUpperCase()).to.startWith(lastCompanyNameLetter);
         });
       });
 
@@ -182,7 +187,7 @@ describe('RealmHelper', function() {
           expect(companies.length).to.be.equal(companyCount - 100);
           expect(companies).to.satisfy((value: Company[]) => {
             return value.every(c => {
-              return !c.name.toUpperCase().startsWith('A');
+              return !c.name.toUpperCase().startsWith(firstCompanyNameLetter);
             });
           });
         });
@@ -193,7 +198,7 @@ describe('RealmHelper', function() {
           const companies = await queryFunc(`(sortBy: "name", take: 100)`);
 
           expect(companies.length).to.be.equal(100);
-          expect(companies[0].name.toUpperCase()).to.startWith('A');
+          expect(companies[0].name.toUpperCase()).to.startWith(firstCompanyNameLetter);
         });
       });
 
@@ -202,8 +207,8 @@ describe('RealmHelper', function() {
           const companies = await queryFunc(`(sortBy: "name", skip: 90, take: 20)`);
           
           expect(companies.length).to.be.equal(20);
-          expect(companies[0].name.toUpperCase()).to.not.startWith('A');
-          expect(companies[19].name.toUpperCase()).to.not.startWith('Z');
+          expect(companies[0].name.toUpperCase()).to.not.startWith(firstCompanyNameLetter);
+          expect(companies[19].name.toUpperCase()).to.not.startWith(lastCompanyNameLetter);
         });
       });
     });
