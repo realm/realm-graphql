@@ -103,7 +103,7 @@ export async function generateFakeDataRealm(generateOnlyIfEmpty: boolean, realmU
             companies.push(c);
         }
     });
-    console.log('Created Companies');
+
     const products: Product[] = [];
     realm.write(() => {
         for (let index = 0; index < 300; index++) {
@@ -116,8 +116,6 @@ export async function generateFakeDataRealm(generateOnlyIfEmpty: boolean, realmU
             products.push(p);
         }
     });
-
-    console.log('Created Products');
 
     const users: User[] = [];
     realm.write(() => {
@@ -132,8 +130,6 @@ export async function generateFakeDataRealm(generateOnlyIfEmpty: boolean, realmU
         }
     });
 
-    console.log('Created Users');
-
     const orders: Order[] = [];
     realm.write(() => {
         for (let index = 0; index < 3000; index++) {
@@ -146,6 +142,6 @@ export async function generateFakeDataRealm(generateOnlyIfEmpty: boolean, realmU
             orders.push(o);
         }
     });
-    console.log('Created Orders');
+
     return realm;
 }

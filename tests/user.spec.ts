@@ -16,12 +16,10 @@ describe('User', function() {
     await testServer.shutdown();
   });
 
-  describe('authenticate', function() {
-    it('should login user', async () => {
-      const credentials = Credentials.UsernamePassword('a@a', 'a', true);
-      const user = await User.authenticate(`http://${testServer.address}`, credentials);
+  it('should authenticate with username/password', async () => {
+    const credentials = Credentials.UsernamePassword('a@a', 'a', true);
+    const user = await User.authenticate(`http://${testServer.address}`, credentials);
 
-      expect(user.token).to.be.not.empty;
-    });
+    expect(user.token).to.be.not.empty;
   });
 });
