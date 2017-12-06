@@ -27,4 +27,17 @@ export class User {
    * Realm Object Server and should be treated as sensitive data.
    */
   public token: string;
+
+  public constructor(init?: Partial<User>) {
+    Object.assign(this, init);
+  }
+
+  public async logOut(): Promise<void> {
+    try {
+      await AuthenticationHelper.revoke(this);
+    } catch {
+      // Just ignore any network failures.
+    }
+    this.token = null;
+  }
 }

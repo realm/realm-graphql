@@ -34,13 +34,16 @@ describe('RealmHelper', function() {
   before(async () => {
     testServer = new GraphQLTestServer();
     await testServer.start();
-    realmUser = Realm.Sync.User.adminUser(testServer.adminToken, `http://${testServer.address}`);
-    testRealm = await generateFakeDataRealm(true, `realm://${testServer.address}/test`, realmUser);
+    realmUser = await Realm.Sync.User.register(`http://${testServer.address}`, 'a@a', 'a');
+    testRealm = await generateFakeDataRealm(true, `realm://${testServer.address}/${realmUser.identity}/test`, realmUser);
 
     // Setup the apollo client
-    const credentials = Credentials.Admin(testServer.adminToken);
+    const credentials = Credentials.UsernamePassword('a@a', 'a');
     const user = await User.authenticate(`http://${testServer.address}`, credentials);
-    helper = await RealmHelper.create(user, '/test');
+    helper = await RealmHelper.create({ 
+      user,
+      realmPath: `/${realmUser.identity}/test`
+    });
   });  
 
   after(async () => {
@@ -53,11 +56,11 @@ describe('RealmHelper', function() {
   });
 
   it('should specify valid graphql url', () => {
-    expect(helper.httpEndpoint).to.equal(`http://${testServer.address}/graphql/%2Ftest`);
+    expect(helper.httpEndpoint).to.equal(`http://${testServer.address}/graphql/%2F${realmUser.identity}%2Ftest`);
   });
 
   it('should specify valid websocket url', () => {
-    expect(helper.webSocketEndpoint).to.be.equal(`ws://${testServer.address}/graphql/%2Ftest`);
+    expect(helper.webSocketEndpoint).to.be.equal(`ws://${testServer.address}/graphql/%2F${realmUser.identity}%2Ftest`);
   });
 
   it('should have valid authLink', () => {

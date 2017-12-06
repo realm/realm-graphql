@@ -1,13 +1,20 @@
 import { ApolloLink } from 'apollo-link';
 import { setContext } from 'apollo-link-context';
+import { setTimeout } from 'timers';
 import * as URI from 'urijs';
 import { AccessToken, AuthenticationHelper } from './authenticationHelper';
 import { User } from './user';
 
+export interface HelperConfig {
+  user: User;
+  realmPath: string;
+  authErrorHandler?: (error: any) => boolean;
+}
+
 export class RealmHelper {
-  public static async create(user: User, realmPath: string): Promise<RealmHelper> {
-    const accessToken = await AuthenticationHelper.refreshAccessToken(user, realmPath);
-    return new RealmHelper(user, realmPath, accessToken);
+  public static async create(config: HelperConfig): Promise<RealmHelper> {
+    const accessToken = await AuthenticationHelper.refreshAccessToken(config.user, config.realmPath);
+    return new RealmHelper(config, accessToken);
   }
 
   public httpEndpoint: string;
@@ -15,10 +22,35 @@ export class RealmHelper {
   public connectionParams: () => any;
   public authLink: ApolloLink;
 
-  private constructor(user: User, realmPath: string, accessToken: AccessToken) {
-    const token = accessToken.token;
+  private constructor(config: HelperConfig, accessToken: AccessToken) {
+    let token = accessToken.token;
+    const user = config.user;
+    const realmPath = config.realmPath;
+    const authErrorHandler = config.authErrorHandler;
 
-    // TODO: setup refreshing!
+    const refresh = (afterDelay: number) => {
+      setTimeout(async () => {
+        if (!user.token) {
+          // User logged out, stop refreshing
+          return;
+        }
+
+        try {
+          const result = await AuthenticationHelper.refreshAccessToken(user, realmPath);
+          token = result.token;
+
+          refresh(result.expires - Date.now() - 10000);
+        } catch (e) {
+          if (!authErrorHandler || !authErrorHandler(e)) {
+            refresh(3000);
+          }
+        }
+      }, afterDelay);
+    };
+
+    if (accessToken.expires) {
+      refresh(accessToken.expires - Date.now() - 10000);
+    }
 
     const grahpQLEndpoint = new URI(user.server).segmentCoded(['graphql', realmPath]);
     this.httpEndpoint = grahpQLEndpoint.toString();

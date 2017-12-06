@@ -5,7 +5,7 @@ import { User } from './user';
 
 export interface AccessToken {
   token: string;
-  expires: Date;
+  expires: number;
 }
 
 export class AuthenticationHelper {
@@ -17,12 +17,12 @@ export class AuthenticationHelper {
 
     // Admin token, just return a fake user
     if (credentials.provider === '__admin') {
-      const result: User = {
+      const result = new User({
         identity: '__admin',
         isAdmin: true,
         server,
         token: credentials.data
-      };
+      });
 
       // Hack: mark the user as token user to short-circuit token refreshes.
       (result as any).isTokenUser = true;
@@ -48,12 +48,12 @@ export class AuthenticationHelper {
         body
       };
     } else {
-      return {
+      return new User({
         identity: body.refresh_token.token_data.identity,
         isAdmin: body.refresh_token.token_data.is_admin,
         server,
         token: body.refresh_token.token
-      };
+      });
     }
   }
 
@@ -78,14 +78,12 @@ export class AuthenticationHelper {
         app_id: ''
       }),
       headers: AuthenticationHelper.postHeaders,
-      // FIXME: This timeout appears to be necessary in order for some requests to be sent at all.
-      // See https://github.com/realm/realm-js-private/issues/338 for details.
-      timeout: 1000.0
+      timeout: 5000.0
     };
 
     const authUri = new URI(user.server).path('/auth');
 
-    const response = await AuthenticationHelper.fetch(authUri, options);
+    const response = await AuthenticationHelper.fetch(authUri.toString(), options);
     const body = await response.json();
 
     if (response.status !== 200) {
@@ -99,8 +97,41 @@ export class AuthenticationHelper {
 
     return {
       token: body.access_token.token,
-      expires: new Date(body.access_token.token_data.expires * 1000)
+      expires: body.access_token.token_data.expires * 1000
     };
+  }
+
+  public static async revoke(user: User): Promise<void> {
+    if (!user.server) {
+      throw new Error('Server for user must be specified');
+    }
+
+    if ((user as any).isTokenUser) {
+      // Admin token can't be revoked
+      return;
+    }
+
+    const options = {
+      method: 'POST',
+      body: JSON.stringify({
+        token: user.token
+      }),
+      headers: { authorization: user.token, ...AuthenticationHelper.postHeaders},
+      timeout: 5000.0
+    };
+
+    const authUri = new URI(user.server).path('/auth/revoke');
+    const response = await AuthenticationHelper.fetch(authUri.toString(), options);
+
+    if (response.status !== 200) {
+      const body = await response.json();
+      throw {
+        name: 'AuthError',
+        status: response.status,
+        statusText: response.statusText,
+        body
+      };
+    }
   }
 
   public static getFetch() {
