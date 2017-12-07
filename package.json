@@ -40,6 +40,7 @@
     "apollo-utilities": "^1.0.3",
     "chai": "^4.1.2",
     "chai-arrays": "^2.0.0",
+    "chai-exclude": "^1.0.3",
     "chai-string": "^1.4.0",
     "faker": "^4.1.0",
     "graphql": "^0.11.7",
