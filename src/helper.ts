@@ -25,7 +25,7 @@ export class RealmHelper {
   private constructor(config: HelperConfig, accessToken: AccessToken) {
     let token = accessToken.token;
     const user = config.user;
-    const realmPath = config.realmPath;
+    const realmPath = config.realmPath.replace('/~/', `/${user.identity}/`);
     const authErrorHandler = config.authErrorHandler;
 
     const refresh = (afterDelay: number) => {

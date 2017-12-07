@@ -58,11 +58,9 @@
   "engines": {
     "node": ">=6.11"
   },
-  "peerDependencies": {
-    "apollo-link": "^1.0.5",
-    "apollo-link-context": "^1.0.2"
-  },
   "dependencies": {
-    "urijs": "^1.19.0"
+    "urijs": "^1.19.0",
+    "apollo-link-context": "^1.0.2",
+    "apollo-link": "^1.0.5"    
   }
 }
