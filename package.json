@@ -1,13 +1,25 @@
 {
-  "name": "realm-object-server-graphql-client",
-  "version": "0.0.1",
-  "description": "realm-object-server-graphql-client",
-  "license": "MIT",
-  "repository": "",
-  "author": "",
+  "name": "realm-graphql-client",
+  "version": "1.0.0",
+  "description": "A set of helper classes to handle authentication when using the Apollo GraphQL client to consume the Realm Object Server GraphQL API.",
+  "repository": "https://github.com/realm/realm-object-server-graphql-client",
+  "license": "SEE LICENSE IN https://realm.io/legal/developer-license-terms/",
+  "homepage": "https://realm.io",
+  "author": {
+      "name": "Realm",
+      "email": "help@realm.io",
+      "url": "https://realm.io"
+  },
   "keywords": [
-    ""
-  ],
+      "Realm",
+      "Object",
+      "Server",
+      "GraphQL",
+      "Client",
+      "Apollo",
+      "Link",
+      "Rest"
+    ],
   "files": [
     "dist"
   ],
@@ -57,6 +69,11 @@
   },
   "engines": {
     "node": ">=6.11"
+  },
+  "peerDependencies": {
+    "apollo-client-preset": "^1.0.4",
+    "apollo-link-ws": "^1.0.2",
+    "subscriptions-transport-ws": "^0.9.4"
   },
   "dependencies": {
     "urijs": "^1.19.0",
