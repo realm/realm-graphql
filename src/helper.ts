@@ -69,18 +69,24 @@ export class RealmHelper {
 
     this.webSocketEndpoint = grahpQLEndpoint.clone().scheme(subscriptionScheme).toString();
     this.connectionParams = () => {
-      return {
-        token
-      };
+      if (token) {
+        return {
+          token
+        };
+      }
+
+      return {};
     };
 
     this.authLink = setContext((_, { headers }) => {
-      return {
-        headers: {
-          ...headers,
-          authorization: token
-        }
-      };
+      if (token) {
+        return {
+          headers: {
+            ...headers,
+            authorization: token
+          }
+        };
+      }
     });
   }
 }

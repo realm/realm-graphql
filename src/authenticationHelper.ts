@@ -15,6 +15,16 @@ export class AuthenticationHelper {
       throw new Error(`The server scheme must be 'http(s)'. Got: ${authUri.scheme()} `);
     }
 
+    // Anonymous user
+    if (credentials.provider === '__anonymous') {
+      return new User({
+        identity: null,
+        isAdmin: false,
+        server,
+        token: null
+      });
+    }
+
     // Admin token, just return a fake user
     if (credentials.provider === '__admin') {
       const result = new User({
@@ -60,6 +70,13 @@ export class AuthenticationHelper {
   public static async refreshAccessToken(user: User, realmPath: string): Promise<AccessToken> {
     if (!user.server) {
       throw new Error('Server for user must be specified');
+    }
+
+    if (user.identity === null && user.token === null) {
+      return {
+        token: null,
+        expires: null
+      };
     }
 
     if ((user as any).isTokenUser) {

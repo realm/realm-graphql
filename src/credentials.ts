@@ -71,6 +71,13 @@ export class Credentials {
     };
   }
 
+  public static Anonymous() : Credentials {
+    return {
+      data: null,
+      provider: '__anonymous'
+    };
+  }
+
   public data: string;
   public provider: string;
 
