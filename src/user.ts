@@ -2,6 +2,11 @@ import { AuthenticationHelper } from './authenticationHelper';
 import { Credentials } from './credentials';
 
 export class User {
+  /**
+   * TODO
+   * @param server
+   * @param credentials
+   */
   public static async authenticate(server: string, credentials: Credentials): Promise<User> {
     return AuthenticationHelper.authenticate(server, credentials);
   }
@@ -32,6 +37,9 @@ export class User {
     Object.assign(this, init);
   }
 
+  /**
+   * TODO
+   */
   public async logOut(): Promise<void> {
     try {
       await AuthenticationHelper.revoke(this);

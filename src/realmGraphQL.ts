@@ -6,8 +6,19 @@ import { AccessToken, AuthenticationHelper } from './authenticationHelper';
 import { User } from './user';
 
 export interface HelperConfig {
+  /**
+   * TODO
+   */
   user: User;
+
+  /**
+   * TODO
+   */
   realmPath: string;
+
+  /**
+   * TODO
+   */
   authErrorHandler?: (error: any) => boolean;
 }
 
@@ -17,9 +28,24 @@ export class RealmGraphQL {
     return new RealmGraphQL(config, accessToken);
   }
 
+  /**
+   * TODO
+   */
   public httpEndpoint: string;
+
+  /**
+   * TODO
+   */
   public webSocketEndpoint: string;
+
+  /**
+   * TODO
+   */
   public connectionParams: () => any;
+
+  /**
+   * TODO
+   */
   public authLink: ApolloLink;
 
   private constructor(config: HelperConfig, accessToken: AccessToken) {
