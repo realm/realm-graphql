@@ -10,7 +10,7 @@ chai.use(chaiExclude);
 import * as Realm from 'realm';
 import { generateFakeDataRealm, Company } from './generate-fake-data';
 import { GraphQLTestServer } from './GraphQLTestServer';
-import { Credentials, User, RealmHelper } from '../src/index';
+import { Credentials, User, RealmGraphQL } from '../src/index';
 import gql from 'graphql-tag';
 import { onError } from "apollo-link-error";
 import * as ws from 'ws';
@@ -28,7 +28,7 @@ import { testServer } from './common';
 import { v4 } from 'uuid';
 import { GraphQLError } from 'graphql/error/GraphQLError';
 
-describe('RealmHelper', async function() {
+describe('RealmGraphQL', async function() {
   const userId = v4();
 
   let realmUser: Realm.Sync.User;
@@ -36,7 +36,7 @@ describe('RealmHelper', async function() {
   let firstCompanyNameLetter: string;
   let lastCompanyNameLetter: string;
 
-  let helper: RealmHelper;
+  let helper: RealmGraphQL;
   let getCompanyCount = () => {
     return testRealm.objects('Company').length;
   };
@@ -59,7 +59,7 @@ describe('RealmHelper', async function() {
     // Setup the apollo client
     const credentials = Credentials.UsernamePassword(userId, 'a');
     const user = await User.authenticate(`http://${testServer.address}`, credentials);
-    helper = await RealmHelper.create({ 
+    helper = await RealmGraphQL.create({ 
       user,
       realmPath: `/${realmUser.identity}/test`
     });

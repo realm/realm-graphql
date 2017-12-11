@@ -36,7 +36,7 @@ Other credential providers are supported, such as JWT, Facebook, Google etc. The
 After you have your user, you can create a helper that will handle token refreshes and authentication:
 
 ```ts
-const helper = await RealmHelper.create({ 
+const helper = await RealmGraphQL.create({ 
   user: user,
   realmPath: `/~/test`
 });

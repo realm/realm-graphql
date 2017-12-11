@@ -11,10 +11,10 @@ export interface HelperConfig {
   authErrorHandler?: (error: any) => boolean;
 }
 
-export class RealmHelper {
-  public static async create(config: HelperConfig): Promise<RealmHelper> {
+export class RealmGraphQL {
+  public static async create(config: HelperConfig): Promise<RealmGraphQL> {
     const accessToken = await AuthenticationHelper.refreshAccessToken(config.user, config.realmPath);
-    return new RealmHelper(config, accessToken);
+    return new RealmGraphQL(config, accessToken);
   }
 
   public httpEndpoint: string;

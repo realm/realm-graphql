@@ -64,6 +64,11 @@ export class Credentials {
     };
   }
 
+  /**
+   * Create Credentials based on an admin token. It's recommended that it is not used in production
+   * as the admin token is sensitive data that should ideally not leave the server.
+   * @param adminToken The Admin token obtained from ROS.
+   */
   public static Admin(adminToken: string): Credentials {
     return {
       data: adminToken,
@@ -71,6 +76,10 @@ export class Credentials {
     };
   }
 
+  /**
+   * Create Credentials without user identity information. It can only be used if `disableAuthentication`
+   * is set to `true` in the GraphQL Service's config.
+   */
   public static Anonymous() : Credentials {
     return {
       data: null,
