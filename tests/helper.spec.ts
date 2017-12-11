@@ -19,7 +19,7 @@ import { createHttpLink } from 'apollo-link-http';
 import * as fetch from 'node-fetch'
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { WebSocketLink } from 'apollo-link-ws';
-import { split } from 'apollo-link';
+import { split, Observable } from 'apollo-link';
 import { getMainDefinition } from 'apollo-utilities';
 import { ApolloClient } from 'apollo-client';
 import { NormalizedCacheObject, InMemoryCache } from 'apollo-cache-inmemory';
@@ -28,9 +28,7 @@ import { testServer } from './common';
 import { v4 } from 'uuid';
 import { GraphQLError } from 'graphql/error/GraphQLError';
 
-describe('RealmHelper', function() {
-  const companyCount = 200;
-
+describe('RealmHelper', async function() {
   const userId = v4();
 
   let realmUser: Realm.Sync.User;
@@ -39,10 +37,13 @@ describe('RealmHelper', function() {
   let lastCompanyNameLetter: string;
 
   let helper: RealmHelper;
+  let getCompanyCount = () => {
+    return testRealm.objects('Company').length;
+  };
 
-  const ensureSynced = async () => {
+  const ensureSynced = async (direction?: 'download' | 'upload') => {
     await new Promise(resolve => setTimeout(resolve, 10));
-    await new Promise(resolve => testRealm.syncSession.addProgressNotification('download', 'forCurrentlyOutstandingWork', (downloaded, downloadable) => {
+    await new Promise(resolve => testRealm.syncSession.addProgressNotification(direction || 'download', 'forCurrentlyOutstandingWork', (downloaded, downloadable) => {
       if (downloaded >= downloadable) {
         resolve();
       }
@@ -66,7 +67,7 @@ describe('RealmHelper', function() {
 
   it('should have some fake data', () => {
     const numberOfCompanies = testRealm.objects('Company').length;
-    expect(numberOfCompanies).to.equal(companyCount);
+    expect(numberOfCompanies).to.equal(200);
   });
 
   it('should specify valid graphql url', () => {
@@ -142,7 +143,7 @@ describe('RealmHelper', function() {
       it('should return the entire dataset', async () => {
         const companies = await queryFunc();
     
-        expect(companies.length).to.equal(companyCount);
+        expect(companies.length).to.equal(getCompanyCount());
 
         expect(companies).to.satisfy((value: Company[]) => {
           return value.every(c => {
@@ -188,7 +189,7 @@ describe('RealmHelper', function() {
 
         // This is a bit optimistic, but expect that the random distribution
         // won't be skewed toward either end.
-        expect(companies.length).to.equal(companyCount - 100);
+        expect(companies.length).to.equal(getCompanyCount() - 100);
         expect(companies).to.satisfy((value: Company[]) => {
           return value.every(c => {
             return !c.name.toUpperCase().startsWith(firstCompanyNameLetter);
@@ -482,6 +483,131 @@ describe('RealmHelper', function() {
             expect(realmCompanyA[prop]).to.equal(companyA[prop]);
             expect(realmCompanyB[prop]).to.equal(companyB[prop]);
           }
+        });
+      });
+    });
+
+    describe('and execute subscription', () => {
+      const subscriptionFunc = async (additionalParameters?: string) => {
+        const subscriptionData = {
+          companies: new Array<Company>(),
+          updates: 0,
+          updateCompanies: (value: Company[], error: any) => {
+            subscriptionData.updates++;
+            if (error) {
+              subscriptionData.error = error;
+            }
+            else {
+              subscriptionData.companies.length = 0;
+              subscriptionData.companies.push(...value);
+            }
+          },
+          error: null,
+          observable: await client.subscribe({
+            query: gql`
+              subscription {
+                companies${additionalParameters || ''} {
+                  companyId
+                  name
+                  address
+                }
+              }
+            `,
+          })
+        };
+
+        subscriptionData.observable.subscribe({
+          next(data) { 
+            subscriptionData.updateCompanies(data.data.companies, null);
+          },
+          error(value) {
+            subscriptionData.updateCompanies(null, value);
+          }
+        });
+
+        await waitForSubscription(subscriptionData);
+
+        return subscriptionData;
+      };
+
+      const waitForSubscription = async (value: {updates: number, error: any}) => {
+        const initial = value.updates;
+        let counter = 20;
+        while (value.updates === initial && counter > 0) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          counter--;
+        }
+
+        expect(value.error).to.be.null;
+      };
+
+      describe('when subscribed to entire dataset', async () => {
+        it('should update when item is added', async () => {
+          const subscriptionData = await subscriptionFunc();
+  
+          expect(subscriptionData.companies.length).to.equal(getCompanyCount());
+          
+          expect(subscriptionData.companies).to.satisfy((value: Company[]) => {
+            return value.every(c => {
+              return !!(c.name && c.address && c.companyId);
+            });
+          });
+  
+          const companyId = v4();
+
+          testRealm.write(() => {
+            testRealm.create<Company>('Company', {
+              companyId,
+              address: 'Some address',
+              name: 'Subscription company'
+            });
+          });
+
+          // Not synced yet
+          expect(subscriptionData.companies.length).to.not.equal(getCompanyCount());
+          await ensureSynced('upload');
+          await waitForSubscription(subscriptionData);
+          
+          expect(subscriptionData.companies.length).to.equal(getCompanyCount());
+          expect(subscriptionData.companies).to.satisfy((value: Company[]) =>  value.some(c => c.companyId === companyId));
+        });
+
+        it('should update when item is deleted', async () => {
+          const subscriptionData = await subscriptionFunc();
+          
+          const toDeleteId = subscriptionData.companies[0].companyId;
+
+          testRealm.write(() => {
+            const toDelete = testRealm.objectForPrimaryKey('Company', toDeleteId);
+            testRealm.delete(toDelete);
+          });
+
+          // Not synced yet
+          expect(subscriptionData.companies.length).to.not.equal(getCompanyCount());
+          await ensureSynced('upload');
+          await waitForSubscription(subscriptionData);
+          
+          expect(subscriptionData.companies.length).to.equal(getCompanyCount());
+          expect(subscriptionData.companies).to.satisfy((value: Company[]) =>  value.every(c => c.companyId !== toDeleteId));
+        });
+
+        it('should update when item is updated', async () => {
+          const subscriptionData = await subscriptionFunc();
+          
+          const toUpdateId = subscriptionData.companies[0].companyId;
+
+          testRealm.write(() => {
+            const toUpdate = testRealm.objectForPrimaryKey<Company>('Company', toUpdateId);
+            toUpdate.address = 'This was updated!';
+          });
+
+          await ensureSynced('upload');
+          await waitForSubscription(subscriptionData);
+          
+          expect(subscriptionData.companies.length).to.equal(getCompanyCount());
+
+          const updated = subscriptionData.companies.find(c => c.companyId === toUpdateId);
+          expect(updated.address).to.equal('This was updated!');
         });
       });
     });
