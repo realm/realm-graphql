@@ -181,11 +181,11 @@ export class GraphQLConfig {
       refresh(accessToken.expires - Date.now() - 10000);
     }
 
-    const grahpQLEndpoint = new URI(user.server).segmentCoded(['graphql', realmPath]);
-    this.httpEndpoint = grahpQLEndpoint.toString();
+    const graphQLEndpoint = new URI(user.server).segmentCoded(['graphql', realmPath]);
+    this.httpEndpoint = graphQLEndpoint.toString();
 
     let subscriptionScheme: string;
-    switch (grahpQLEndpoint.scheme()) {
+    switch (graphQLEndpoint.scheme()) {
       case 'http':
         subscriptionScheme = 'ws';
         break;
@@ -193,10 +193,10 @@ export class GraphQLConfig {
         subscriptionScheme = 'wss';
         break;
       default:
-        throw new Error(`Unrecognized scheme for the server endpoint: ${grahpQLEndpoint.scheme()}`);
+        throw new Error(`Unrecognized scheme for the server endpoint: ${graphQLEndpoint.scheme()}`);
     }
 
-    this.webSocketEndpoint = grahpQLEndpoint.clone().scheme(subscriptionScheme).toString();
+    this.webSocketEndpoint = graphQLEndpoint.clone().scheme(subscriptionScheme).toString();
     this.connectionParams = () => {
       if (token) {
         return {
