@@ -57,7 +57,7 @@ describe('RealmGraphQL', async function() {
     lastCompanyNameLetter = testRealm.objects<Company>('Company').sorted('name', true)[0].name.toUpperCase()[0];
 
     // Setup the apollo client
-    const credentials = Credentials.UsernamePassword(userId, 'a');
+    const credentials = Credentials.usernamePassword(userId, 'a');
     const user = await User.authenticate(credentials, `http://${testServer.address}`);
     helper = await GraphQLConfig.create( 
       user,

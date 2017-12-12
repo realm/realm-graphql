@@ -9,7 +9,7 @@ import { v4 } from 'uuid';
 describe('User', function() {
 
   it('should authenticate with username/password', async () => {
-    const credentials = Credentials.UsernamePassword(v4(), 'a', true);
+    const credentials = Credentials.usernamePassword(v4(), 'a', true);
     const user = await User.authenticate(credentials, `http://${testServer.address}`);
 
     expect(user.token).to.be.not.empty;
@@ -17,7 +17,7 @@ describe('User', function() {
 
   describe('logout', () => {
     it('should invalidate token', async () => {
-      const credentials = Credentials.UsernamePassword(v4(), 'b', true);
+      const credentials = Credentials.usernamePassword(v4(), 'b', true);
       const user = await User.authenticate(credentials, `http://${testServer.address}`);
 
       const oldToken = user.token;

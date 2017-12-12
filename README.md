@@ -27,7 +27,7 @@ npm install realm-graphql --save
 To start consuming the GraphQL API, you'll need to login a user:
 
 ```ts
-const credentials = Credentials.UsernamePassword('SOME-USERNAME', 'SOME-PASSWORD');
+const credentials = Credentials.usernamePassword('SOME-USERNAME', 'SOME-PASSWORD');
 const user = await User.authenticate(credentials, 'http://my-ros-instance:9080');
 ```
 

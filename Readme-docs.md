@@ -6,7 +6,7 @@ the Realm Object Server GraphQL API with the [Apollo GraphQL client](https://www
 Here's a minimal getting started example:
 
 ```ts
-const credentials = Credentials.UsernamePassword('SOME-USERNAME', 'SOME-PASSWORD');
+const credentials = Credentials.usernamePassword('SOME-USERNAME', 'SOME-PASSWORD');
 const user = await User.authenticate(credentials, 'http://my-ros-instance:9080');
 
 const config = await GraphQLConfig.create({ 

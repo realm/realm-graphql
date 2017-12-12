@@ -38,7 +38,6 @@
   "typedocOptions": {
     "mode": "file",
     "out": "docs",
-    "theme": "minimal",
     "ignoreCompilerErrors": true,
     "excludePrivate": true,
     "excludeNotExported": true,

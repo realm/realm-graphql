@@ -7,7 +7,7 @@ export class Credentials {
    * @param {string} facebookToken A Facebook authentication token, obtained by logging into Facebook.
    * @returns An instance of [[Credentials]] that can be passed to [[User.authenticate]].
    */
-  public static Facebook(facebookToken: string): Credentials {
+  public static facebook(facebookToken: string): Credentials {
     return {
       data: facebookToken,
       provider: 'facebook',
@@ -19,7 +19,7 @@ export class Credentials {
    * @param {string} googleToken A Google authentication token, obtained by logging into Google.
    * @returns An instance of [[Credentials]] that can be passed to [[User.authenticate]].
    */
-  public static Google(googleToken: string): Credentials {
+  public static google(googleToken: string): Credentials {
     return {
       data: googleToken,
       provider: 'google'
@@ -33,7 +33,7 @@ export class Credentials {
    * @param createUser A value indicating whether the user should be created.
    * @returns An instance of [[Credentials]] that can be passed to [[User.authenticate]].
    */
-  public static UsernamePassword(username: string, password: string, createUser?: boolean): Credentials {
+  public static usernamePassword(username: string, password: string, createUser?: boolean): Credentials {
     return {
       data: username,
       provider: 'password',
@@ -49,7 +49,7 @@ export class Credentials {
    * @param adToken An access token, obtained by logging into Azure Active Directory.
    * @returns An instance of [[Credentials]] that can be passed to [[User.authenticate]].
    */
-  public static AzureAD(adToken: string): Credentials {
+  public static azureAD(adToken: string): Credentials {
     return {
       data: adToken,
       provider: 'azuread'
@@ -63,7 +63,7 @@ export class Credentials {
    * @see {@link https://realm.io/docs/realm-object-server/latest#jwt-custom-authentication Realm
    * Object Server documentation} for custom authentication via JWT.
    */
-  public static JWT(jwtToken: string): Credentials {
+  public static jwt(jwtToken: string): Credentials {
     return {
       data: jwtToken,
       provider: 'jwt'
@@ -76,7 +76,7 @@ export class Credentials {
    * @param adminToken The Admin token obtained from ROS.
    * @returns An instance of [[Credentials]] that can be passed to [[User.authenticate]].
    */
-  public static Admin(adminToken: string): Credentials {
+  public static admin(adminToken: string): Credentials {
     return {
       data: adminToken,
       provider: '__admin'
@@ -88,7 +88,7 @@ export class Credentials {
    * is set to `true` in the GraphQL Service's config.
    * @returns An instance of [[Credentials]] that can be passed to [[User.authenticate]].
    */
-  public static Anonymous(): Credentials {
+  public static anonymous(): Credentials {
     return {
       data: null,
       provider: '__anonymous'
