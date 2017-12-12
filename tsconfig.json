@@ -1,38 +1,57 @@
 {
   "compilerOptions": {
-      "target": "es6",
-      "module": "commonjs",
-      "moduleResolution": "node",
-      "noImplicitAny": false,
-      "removeComments": true,
-      "preserveConstEnums": true,
-      "sourceMap": true,
-      "outDir": "dist",
-      "sourceRoot": "src",
-      "declaration": true,
-      "emitDecoratorMetadata": true,
-      "experimentalDecorators": true,
-      "lib": [
-          "es5",
-          "es6",
-          "dom",
-          "es2015.core",
-          "es2015.collection",
-          "es2015.generator",
-          "es2015.iterable",
-          "es2015.promise",
-          "es2015.proxy",
-          "es2015.reflect",
-          "es2015.symbol",
-          "es2015.symbol.wellknown",
-          "esnext.asynciterable"
-      ]
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "outDir": "dist",
+    "sourceRoot": "src",
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": [
+      "es5",
+      "es6",
+      "dom",
+      "es2015.core",
+      "es2015.collection",
+      "es2015.generator",
+      "es2015.iterable",
+      "es2015.promise",
+      "es2015.proxy",
+      "es2015.reflect",
+      "es2015.symbol",
+      "es2015.symbol.wellknown",
+      "esnext.asynciterable"
+    ]
   },
   "include": [
-      "src/**/*.ts"
+    "src/**/*.ts"
   ],
   "exclude": [
-      "node_modules",
-      "dist"
-  ]
+    "node_modules",
+    "dist"
+  ],
+  "typedocOptions": {
+    "mode": "file",
+    "out": "docs/output",
+    "theme":"docs/theme",
+    "ignoreCompilerErrors": true,
+    "excludePrivate": true,
+    "excludeNotExported": true,
+    "target": "ES6",
+    "moduleResolution": "node",
+    "preserveConstEnums": true,
+    "stripInternal": true,
+    "module": "commonjs",
+    "hideGenerator": true,
+    "readme": "docs/Readme.md",
+    "includeDeclarations": false,
+    "exclude": "**/src/authenticationHelper.ts",
+    "name": "Realm GraphQL Client API docs",
+    "inlineSourceMap": true
+  }
 }
