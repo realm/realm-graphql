@@ -37,7 +37,8 @@
   ],
   "typedocOptions": {
     "mode": "file",
-    "out": "docs",
+    "out": "docs/output",
+    "theme":"docs/theme",
     "ignoreCompilerErrors": true,
     "excludePrivate": true,
     "excludeNotExported": true,
@@ -47,7 +48,7 @@
     "stripInternal": true,
     "module": "commonjs",
     "hideGenerator": true,
-    "readme": "Readme-docs.md",
+    "readme": "docs/Readme.md",
     "includeDeclarations": false,
     "exclude": "**/src/authenticationHelper.ts",
     "name": "Realm GraphQL Client API docs",
