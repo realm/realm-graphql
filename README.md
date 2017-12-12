@@ -1,4 +1,4 @@
-# Realm Object Server GraphQL Client - With TypeScript!
+# Realm GraphQL Client
 
 A set of helper methods and classes to make it easier to use the Apollo GraphQL client with the Realm Object Server.
 
@@ -33,40 +33,39 @@ const user = await User.authenticate(credentials, 'http://my-ros-instance:9080')
 
 Other credential providers are supported, such as JWT, Facebook, Google etc. They are all exposed as factories on the `Credentials` class.
 
-After you have your user, you can create a helper that will handle token refreshes and authentication:
+After you have your user, you can create a helper config that will handle token refreshes and authentication:
 
 ```ts
-const helper = await GraphQLConfig.create({ 
+const config = await GraphQLConfig.create({ 
   user: user,
   realmPath: `/~/test`
 });
 ```
 
-Note that each helper is created per Realm path, so if you need to query multiple Realms, you'll need to obtain a helper instance for each of them.
+Note that each config is created per Realm path, so if you need to query multiple Realms, you'll need to obtain a config instance for each of them.
 
 #### Setting up the Client
 
-Once you have a helper, you can use that to create an Apollo client instance and configure it. The helper exposes 4 properties:
+Once you have a config, you can use that to create an Apollo client instance and configure it. The config exposes 4 properties:
 
-- `httpEndpoint`: This is the endpoint you'll use to execute queries and mutations against. It can be used to configure Apollo's [httpLink](https://www.apollographql.com/docs/link/links/http.html).
-- `authLink`: This is a link that provides an Authorization header for the user/path combination. It should be composed together with your `httpLink`.
-- `webSocketEndpoint`: This is the endpoint you'll use to execute subscriptions against. It can be used to configure Apollo's [SubscriptionClient](https://www.apollographql.com/docs/link/links/ws.html#Usage).
-- `connectionParams`: This is a function that will provide an authorization object each time a websocket connection is established. You should pass that directly (without invoking it) to the SubscriptionClient constructor's options.
+- `httpEndpoint`: This is the endpoint you'll use to execute queries and mutations against.
+It can be used to configure Apollo's [httpLink](https://www.apollographql.com/docs/link/links/http.html).
+- `authLink`: This is a link that provides an Authorization header for the user/path combination.
+It should be composed together with your `httpLink`.
+- `webSocketEndpoint`: This is the endpoint you'll use to execute subscriptions against. It can be
+used to configure Apollo's [WebSocket Link](https://www.apollographql.com/docs/link/links/ws.html).
+- `connectionParams`: This is a function that will provide an authorization object each time a
+websocket connection is established. You should pass that directly (without invoking it) to the
+WebSocketLink's constructor's options.
 
 Let's look at a small example. First, let's configure the `httpLink` that we'll use for querying and mutating:
 
 ```ts
-import { createHttpLink } from 'apollo-link-http';
-import { from } from 'apollo-link';
-
-const httpLink = createHttpLink({
-  uri: helper.httpEndpoint
-});
-
-const authenticatedHttpLink = from([
-  helper.authLink,
-  httpLink
-]);
+const httpLink = concat(
+    config.authLink,
+    // Note: if using node.js, you'll need to provide fetch as well.
+    new HttpLink({ uri: config.httpEndpoint })
+  );
 ```
 
 Then, let's configure the websocket link that we'll use for subscriptions:
@@ -75,12 +74,13 @@ Then, let's configure the websocket link that we'll use for subscriptions:
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { WebSocketLink } from 'apollo-link-ws';
 
-const subscriptionClient = new SubscriptionClient(helper.webSocketEndpoint, {
-  // Note we're passing the function, not invoking it
-  connectionParams: helper.connectionParams
+// Note: if using node.js, you'll need to provide webSocketImpl as well.
+const webSocketLink = new WebSocketLink({
+  uri: config.webSocketEndpoint,
+  options: {
+    connectionParams: config.connectionParams,
+  }
 });
-
-const webSocketLink = new WebSocketLink(subscriptionClient);
 ```
 
 Finally, we need to use [split](https://www.apollographql.com/docs/link/composition.html#directional) to direct subscriptions to the websocket link and queries and mutations to the http link:
@@ -91,7 +91,7 @@ const link = split(({ query }) => {
     return kind === 'OperationDefinition' && operation === 'subscription';
   },
   webSocketLink,
-  authenticatedHttpLink);
+  httpLink);
 
 // Finally, create the client
 client = new ApolloClient({
@@ -162,7 +162,32 @@ For a detailed documentation on the Apollo Client query capabilities, refer to t
 
 #### Subscriptions
 
-**TBD**
+Subscribing for changes happens when you invoke the `client.subscribe()` method. You get
+an `Observable` sequence you can then add an observer to:
+
+```ts
+const observable = await client.subscribe({
+  query: gql`
+    subscription {
+      companies${additionalParameters || ''} {
+        companyId
+        name
+        address
+      }
+    }
+  `,
+});
+
+observable.subscribe({
+  next(data) {
+    const companies = data.data.companies;
+    // Update you UI
+  },
+  error(value) {
+    // Notify the user of the failure
+  }
+});
+```
 
 For a complete list of supported mutation operations, refer to the [GraphQL Server docs](https://github.com/realm/realm-object-server-graphql#subscribing).
 
