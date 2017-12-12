@@ -4,7 +4,7 @@ A set of helper methods and classes to make it easier to use the Apollo GraphQL 
 
 ## Using the Client
 
-The Realm GraphQL client provides a few helper and convenience API to make it easier to consume the [Realm Object Server GraphQL API](https://github.com/realm/realm-object-server-graphql) with the [Apollo Client](https://www.apollographql.com/client).
+The Realm GraphQL client provides a few helper and convenience API to make it easier to consume the [Realm Object Server GraphQL API](https://github.com/realm/realm-graphql-service) with the [Apollo Client](https://www.apollographql.com/client).
 
 ### Prerequisites
 
