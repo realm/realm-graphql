@@ -98,7 +98,7 @@ describe('RealmGraphQL', async function() {
         fetch: fetch
       });
   
-      const subscriptionLink1 = new WebSocketLink({
+      const subscriptionLink = new WebSocketLink({
         uri: helper.webSocketEndpoint,
         options: {
           connectionParams: helper.connectionParams,
@@ -107,14 +107,6 @@ describe('RealmGraphQL', async function() {
         },
         webSocketImpl: ws
       });
-
-      new HttpLink()
-  const subscriptionLink = new WebSocketLink({
-    uri: helper.webSocketEndpoint,
-    options: {
-      connectionParams: helper.connectionParams
-    }
-  });
 
       const link = split(({ query }) => {
           const { kind, operation } = getMainDefinition(query);

@@ -48,7 +48,7 @@
     "stripInternal": true,
     "module": "commonjs",
     "hideGenerator": true,
-    "readme": "none",
+    "readme": "Readme-docs.md",
     "includeDeclarations": false,
     "exclude": "**/src/authenticationHelper.ts",
     "name": "Realm GraphQL Client API docs",

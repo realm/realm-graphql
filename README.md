@@ -28,7 +28,7 @@ To start consuming the GraphQL API, you'll need to login a user:
 
 ```ts
 const credentials = Credentials.UsernamePassword('SOME-USERNAME', 'SOME-PASSWORD');
-const user = await User.authenticate('http://my-ros-instance:9080', credentials);
+const user = await User.authenticate(credentials, 'http://my-ros-instance:9080');
 ```
 
 Other credential providers are supported, such as JWT, Facebook, Google etc. They are all exposed as factories on the `Credentials` class.
@@ -36,7 +36,7 @@ Other credential providers are supported, such as JWT, Facebook, Google etc. The
 After you have your user, you can create a helper that will handle token refreshes and authentication:
 
 ```ts
-const helper = await RealmGraphQL.create({ 
+const helper = await GraphQLConfig.create({ 
   user: user,
   realmPath: `/~/test`
 });
@@ -123,7 +123,7 @@ const response = await client.query({
   query: query
 });
 
-const companies = result.data.companies;
+const companies = response.data.companies;
 ```
 
 For a complete list of supported query operations, refer to the [GraphQL Server docs](https://github.com/realm/realm-object-server-graphql#querying).
