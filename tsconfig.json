@@ -52,6 +52,7 @@
     "includeDeclarations": false,
     "exclude": "**/src/authenticationHelper.ts",
     "name": "Realm GraphQL Client API docs",
-    "inlineSourceMap": true
+    "inlineSourceMap": true,
+    "gitRevision": "master"
   }
 }
