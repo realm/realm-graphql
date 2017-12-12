@@ -15,7 +15,7 @@ export interface AccessToken {
  * @hidden
  */
 export class AuthenticationHelper {
-  public static async authenticate(server: string, credentials: Credentials): Promise<User> {
+  public static async authenticate(credentials: Credentials, server: string): Promise<User> {
     const authUri = new URI(server).path('/auth');
     if (authUri.scheme() !== 'http' && authUri.scheme() !== 'https') {
       throw new Error(`The server scheme must be 'http(s)'. Got: ${authUri.scheme()} `);

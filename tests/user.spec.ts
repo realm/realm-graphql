@@ -10,7 +10,7 @@ describe('User', function() {
 
   it('should authenticate with username/password', async () => {
     const credentials = Credentials.UsernamePassword(v4(), 'a', true);
-    const user = await User.authenticate(`http://${testServer.address}`, credentials);
+    const user = await User.authenticate(credentials, `http://${testServer.address}`);
 
     expect(user.token).to.be.not.empty;
   });
@@ -18,7 +18,7 @@ describe('User', function() {
   describe('logout', () => {
     it('should invalidate token', async () => {
       const credentials = Credentials.UsernamePassword(v4(), 'b', true);
-      const user = await User.authenticate(`http://${testServer.address}`, credentials);
+      const user = await User.authenticate(credentials, `http://${testServer.address}`);
 
       const oldToken = user.token;
       await user.logOut();

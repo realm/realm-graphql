@@ -10,12 +10,12 @@ chai.use(chaiExclude);
 import * as Realm from 'realm';
 import { generateFakeDataRealm, Company } from './generate-fake-data';
 import { GraphQLTestServer } from './GraphQLTestServer';
-import { Credentials, User, RealmGraphQL } from '../src/index';
+import { Credentials, User, GraphQLConfig } from '../src/index';
 import gql from 'graphql-tag';
 import { onError } from "apollo-link-error";
 import * as ws from 'ws';
 import { setTimeout } from 'timers';
-import { createHttpLink } from 'apollo-link-http';
+import { createHttpLink, HttpLink } from 'apollo-link-http';
 import * as fetch from 'node-fetch'
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { WebSocketLink } from 'apollo-link-ws';
@@ -36,7 +36,7 @@ describe('RealmGraphQL', async function() {
   let firstCompanyNameLetter: string;
   let lastCompanyNameLetter: string;
 
-  let helper: RealmGraphQL;
+  let helper: GraphQLConfig;
   let getCompanyCount = () => {
     return testRealm.objects('Company').length;
   };
@@ -58,11 +58,11 @@ describe('RealmGraphQL', async function() {
 
     // Setup the apollo client
     const credentials = Credentials.UsernamePassword(userId, 'a');
-    const user = await User.authenticate(`http://${testServer.address}`, credentials);
-    helper = await RealmGraphQL.create({ 
+    const user = await User.authenticate(credentials, `http://${testServer.address}`);
+    helper = await GraphQLConfig.create( 
       user,
-      realmPath: `/${realmUser.identity}/test`
-    });
+      `/${realmUser.identity}/test`
+    );
   });  
 
   it('should have some fake data', () => {
@@ -98,13 +98,24 @@ describe('RealmGraphQL', async function() {
         fetch: fetch
       });
   
-      const subscriptionClient = new SubscriptionClient(helper.webSocketEndpoint, {
-        connectionParams: helper.connectionParams,
-        reconnect: true,
-        lazy: true
-      }, ws);
-  
-      const subscriptionLink = new WebSocketLink(subscriptionClient);
+      const subscriptionLink1 = new WebSocketLink({
+        uri: helper.webSocketEndpoint,
+        options: {
+          connectionParams: helper.connectionParams,
+          reconnect: true,
+          lazy: true
+        },
+        webSocketImpl: ws
+      });
+
+      new HttpLink()
+  const subscriptionLink = new WebSocketLink({
+    uri: helper.webSocketEndpoint,
+    options: {
+      connectionParams: helper.connectionParams
+    }
+  });
+
       const link = split(({ query }) => {
           const { kind, operation } = getMainDefinition(query);
           return kind === 'OperationDefinition' && operation === 'subscription';

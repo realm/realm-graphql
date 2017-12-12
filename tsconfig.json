@@ -51,7 +51,7 @@
     "readme": "none",
     "includeDeclarations": false,
     "exclude": "**/src/authenticationHelper.ts",
-    "name": "Realm GraphQL Client",
+    "name": "Realm GraphQL Client API docs",
     "inlineSourceMap": true
   }
 }
