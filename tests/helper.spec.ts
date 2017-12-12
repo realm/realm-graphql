@@ -515,7 +515,7 @@ describe('RealmGraphQL', async function() {
                   address
                 }
               }
-            `,
+            `
           })
         };
 

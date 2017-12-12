@@ -175,7 +175,7 @@ const observable = await client.subscribe({
         address
       }
     }
-  `,
+  `
 });
 
 observable.subscribe({
