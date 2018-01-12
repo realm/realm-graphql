@@ -17,7 +17,7 @@ npm install apollo-client-preset apollo-link-ws subscriptions-transport-ws --sav
 Then, add the Realm GraphQL client package:
 
 ```
-npm install realm-graphql --save
+npm install realm-graphql-client --save
 ```
 
 ### Getting Started
