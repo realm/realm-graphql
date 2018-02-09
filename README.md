@@ -36,10 +36,10 @@ Other credential providers are supported, such as JWT, Facebook, Google etc. The
 After you have your user, you can create a helper config that will handle token refreshes and authentication:
 
 ```ts
-const config = await GraphQLConfig.create({ 
-  user: user,
-  realmPath: `/~/test`
-});
+const config = await GraphQLConfig.create( 
+  user,
+  '/~/test'
+);
 ```
 
 Note that each config is created per Realm path, so if you need to query multiple Realms, you'll need to obtain a config instance for each of them.
