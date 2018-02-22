@@ -58,7 +58,7 @@
     "graphql-tag": "^2.5.0",
     "mocha": "^4.0.1",
     "realm-object-server": "^2.1.1",
-    "realm-object-server-graphql": "file:../realm-object-server-graphql",
+    "realm-object-server-graphql": "file:../realm-graphql-service",
     "subscriptions-transport-ws": "^0.9.4",
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
