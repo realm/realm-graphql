@@ -1,5 +1,5 @@
 import { TestServer } from 'realm-object-server';
-import { GraphQLService } from '../../realm-object-server-graphql/src/service';
+import { GraphQLService } from 'realm-graphql-service';
 import * as fs from 'fs-extra'
 import * as tmp from 'tmp';
 import * as path from 'path';
