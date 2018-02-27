@@ -9,10 +9,10 @@ Here's a minimal getting started example:
 const credentials = Credentials.usernamePassword('SOME-USERNAME', 'SOME-PASSWORD');
 const user = await User.authenticate(credentials, 'http://my-ros-instance:9080');
 
-const config = await GraphQLConfig.create({ 
-  user: user,
-  realmPath: `/~/test`
-});
+const config = await GraphQLConfig.create(
+  user,
+  `/~/test`
+);
 
 const httpLink = concat(
     config.authLink,
