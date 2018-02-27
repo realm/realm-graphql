@@ -29,6 +29,9 @@ import { v4 } from 'uuid';
 import { GraphQLError } from 'graphql/error/GraphQLError';
 
 describe('RealmGraphQL', async function() {
+  // @ts-ignore
+  global.fetch = fetch;
+
   const userId = v4();
 
   let realmUser: Realm.Sync.User;

@@ -54,7 +54,7 @@ export class AuthenticationHelper {
       open_timeout: 5000
     };
 
-    const response = await AuthenticationHelper.fetch(authUri.toString(), options);
+    const response = await fetch(authUri.toString(), options);
     const body = await response.json();
     if (response.status !== 200) {
       throw {
@@ -106,7 +106,7 @@ export class AuthenticationHelper {
 
     const authUri = new URI(user.server).path('/auth');
 
-    const response = await AuthenticationHelper.fetch(authUri.toString(), options);
+    const response = await fetch(authUri.toString(), options);
     const body = await response.json();
 
     if (response.status !== 200) {
@@ -139,12 +139,12 @@ export class AuthenticationHelper {
       body: JSON.stringify({
         token: user.token
       }),
-      headers: { authorization: user.token, ...AuthenticationHelper.postHeaders},
+      headers: { authorization: user.token, ...AuthenticationHelper.postHeaders },
       timeout: 5000.0
     };
 
     const authUri = new URI(user.server).path('/auth/revoke');
-    const response = await AuthenticationHelper.fetch(authUri.toString(), options);
+    const response = await fetch(authUri.toString(), options);
 
     if (response.status !== 200) {
       const body = await response.json();
@@ -157,19 +157,8 @@ export class AuthenticationHelper {
     }
   }
 
-  public static getFetch() {
-    return this.fetch;
-  }
-
-  private static requireMethod = require;
-  private static fetch = typeof fetch === 'undefined' ? AuthenticationHelper.nodeRequire('node-fetch') : fetch;
-
   private static postHeaders = {
     'content-type': 'application/json;charset=utf-8',
     'accept': 'application/json'
   };
-
-  private static nodeRequire(module) {
-    return AuthenticationHelper.requireMethod(module);
-  }
 }
