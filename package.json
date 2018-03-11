@@ -76,8 +76,9 @@
     "subscriptions-transport-ws": "^0.9.4"
   },
   "dependencies": {
-    "urijs": "^1.19.0",
+    "apollo-link": "^1.0.5",
     "apollo-link-context": "^1.0.2",
-    "apollo-link": "^1.0.5"
+    "node-fetch": "^2.1.1",
+    "urijs": "^1.19.0"
   }
 }

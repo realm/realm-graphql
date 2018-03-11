@@ -139,7 +139,7 @@ export class AuthenticationHelper {
       body: JSON.stringify({
         token: user.token
       }),
-      headers: { authorization: user.token, ...AuthenticationHelper.postHeaders},
+      headers: { authorization: user.token, ...AuthenticationHelper.postHeaders },
       timeout: 5000.0
     };
 
@@ -157,19 +157,20 @@ export class AuthenticationHelper {
     }
   }
 
-  public static getFetch() {
-    return this.fetch;
-  }
-
-  private static requireMethod = require;
-  private static fetch = typeof fetch === 'undefined' ? AuthenticationHelper.nodeRequire('node-fetch') : fetch;
-
+  private static fetch = AuthenticationHelper.getFetch();
   private static postHeaders = {
     'content-type': 'application/json;charset=utf-8',
     'accept': 'application/json'
   };
 
-  private static nodeRequire(module) {
-    return AuthenticationHelper.requireMethod(module);
+  private static getFetch() {
+    if (typeof fetch !== 'undefined') {
+      return fetch;
+    }
+    if (this.fetch === undefined) {
+      this.fetch = require('node-fetch');
+    }
+    return this.fetch;
   }
+
 }
