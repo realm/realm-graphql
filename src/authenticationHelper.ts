@@ -165,7 +165,7 @@ export class AuthenticationHelper {
 
   private static getFetch() {
     if (typeof fetch !== 'undefined') {
-      return fetch;
+      return fetch.bind(window);
     }
     if (this.fetch === undefined) {
       this.fetch = require('node-fetch');
