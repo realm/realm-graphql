@@ -96,6 +96,22 @@ export class Credentials {
   }
 
   /**
+   * Creates Credentials based on a unique nickname. It's recommended that it is not used in production.
+   * @param nickname The nickname of the user
+   * @param isAdmin If the user should be an admin
+   */
+  public static nickname(nickname: string, isAdmin: boolean = false): Credentials {
+    return {
+      data: nickname,
+      provider: 'nickname',
+      user_info: {
+        is_admin: isAdmin
+      }
+    };
+  }
+  
+
+  /**
    * Creates Credentials based on a login with a custom system.
    * @param provider Provider used to verify the credentials.
    * @param token String identifying the user. Usually a username or user token.
