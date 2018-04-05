@@ -1,6 +1,6 @@
 {
   "name": "realm-graphql-client",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "A set of helper classes to handle authentication when using the Apollo GraphQL client to consume the Realm Object Server GraphQL API.",
   "repository": "https://github.com/realm/realm-graphql",
   "license": "SEE LICENSE IN https://realm.io/legal/developer-license-terms/",
@@ -57,8 +57,8 @@
     "graphql": "^0.11.7",
     "graphql-tag": "^2.5.0",
     "mocha": "^4.0.1",
-    "realm-object-server": "^2.8.0",
-    "realm-graphql-service": "^2.0.2",
+    "realm-object-server": "3.0.0",
+    "realm-graphql-service": "2.2.0",
     "subscriptions-transport-ws": "^0.9.4",
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
