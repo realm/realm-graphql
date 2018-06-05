@@ -11,7 +11,7 @@ The Realm GraphQL client provides a few helper and convenience API to make it ea
 Add the [apollo-client-preset](https://www.npmjs.com/package/apollo-client-preset), [apollo-link-ws](https://www.npmjs.com/package/apollo-link-ws), and [subscriptions-transport-ws](https://www.npmjs.com/package/subscriptions-transport-ws) packages to your project:
 
 ```
-npm install apollo-client-preset apollo-link-ws subscriptions-transport-ws --save
+npm install graphql apollo-client-preset apollo-link-ws subscriptions-transport-ws --save
 ```
 
 Then, add the Realm GraphQL client package:
@@ -27,6 +27,8 @@ npm install realm-graphql-client --save
 To start consuming the GraphQL API, you'll need to login a user:
 
 ```ts
+import { Credentials, User } from 'realm-graphql-client';
+
 const credentials = Credentials.usernamePassword('SOME-USERNAME', 'SOME-PASSWORD');
 const user = await User.authenticate(credentials, 'http://my-ros-instance:9080');
 ```
@@ -36,6 +38,8 @@ Other credential providers are supported, such as JWT, Facebook, Google etc. The
 After you have your user, you can create a helper config that will handle token refreshes and authentication:
 
 ```ts
+import { GraphQLConfig } from 'realm-graphql-client';
+
 const config = await GraphQLConfig.create( 
   user,
   '/~/test'
@@ -61,6 +65,8 @@ WebSocketLink's constructor's options.
 Let's look at a small example. First, let's configure the `httpLink` that we'll use for querying and mutating:
 
 ```ts
+import { concat, HttpLink } from 'apollo-client-preset';
+
 const httpLink = concat(
     config.authLink,
     // Note: if using node.js, you'll need to provide fetch as well.
@@ -85,12 +91,17 @@ const webSocketLink = new WebSocketLink({
 Finally, we need to use [split](https://www.apollographql.com/docs/link/composition.html#directional) to direct subscriptions to the websocket link and queries and mutations to the http link:
 
 ```ts
-const link = split(({ query }) => {
+import { split } from 'apollo-client-preset';
+import { getMainDefinition } from 'apollo-utilities';
+
+const link = split(
+  ({ query }) => {
     const { kind, operation } = getMainDefinition(query);
     return kind === 'OperationDefinition' && operation === 'subscription';
   },
   webSocketLink,
-  httpLink);
+  httpLink,
+);
 
 // Finally, create the client
 client = new ApolloClient({
