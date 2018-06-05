@@ -11,7 +11,7 @@ The Realm GraphQL client provides a few helper and convenience API to make it ea
 Add the [apollo-client-preset](https://www.npmjs.com/package/apollo-client-preset), [apollo-link-ws](https://www.npmjs.com/package/apollo-link-ws), and [subscriptions-transport-ws](https://www.npmjs.com/package/subscriptions-transport-ws) packages to your project:
 
 ```
-npm install graphql apollo-client-preset apollo-link-ws subscriptions-transport-ws --save
+npm install graphql apollo-client-preset apollo-link-ws apollo-utilities subscriptions-transport-ws --save
 ```
 
 Then, add the Realm GraphQL client package:
