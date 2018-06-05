@@ -71,7 +71,6 @@ const httpLink = concat(
 Then, let's configure the websocket link that we'll use for subscriptions:
 
 ```ts
-import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { WebSocketLink } from 'apollo-link-ws';
 
 // Note: if using node.js, you'll need to provide webSocketImpl as well.
