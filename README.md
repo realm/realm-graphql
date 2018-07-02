@@ -130,6 +130,19 @@ For a complete list of supported query operations, refer to the [GraphQL Server 
 
 For a detailed documentation on the Apollo Client query capabilities, refer to the [Apollo docs](https://www.apollographql.com/docs/angular/basics/queries.html).
 
+For a comprehensive documentation on the query language syntax, refer to the [Realm JS Query Language docs](https://github.com/realm/realm-js/blob/master/docs/tutorials/query-language.md#backlink-queries).
+
+**Note**: Server Realms (used by GraphQL) don't have named backlinks, even if the client Realms had them defined, so you'll need to use the fully qualified backlink syntax, e.g.:
+
+```json
+{
+  golfers(query: "@links.Club.golfers.id = 'some-club-id'") {
+    firstName
+    lastName
+  }
+}
+```
+
 #### Mutations
 
 Mutating data happens when you invoke the `client.mutate()` method:
