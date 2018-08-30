@@ -1,7 +1,8 @@
 import * as isomorphicFetch from 'isomorphic-fetch';
 import * as URI from 'urijs';
-import { Credentials } from './credentials';
-import { User } from './user';
+
+import { Credentials } from './Credentials';
+import { User } from './User';
 
 /**
  * @hidden

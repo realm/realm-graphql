@@ -1,5 +1,5 @@
-import { AuthenticationHelper } from './authenticationHelper';
-import { Credentials } from './credentials';
+import { AuthenticationHelper } from './AuthenticationHelper';
+import { Credentials } from './Credentials';
 
 /**
  * This class represents a user on the Realm Object Server. The credentials are provided

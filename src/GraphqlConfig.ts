@@ -1,8 +1,9 @@
 import { ApolloLink } from 'apollo-link';
 import { setContext } from 'apollo-link-context';
 import * as URI from 'urijs';
-import { AccessToken, AuthenticationHelper } from './authenticationHelper';
-import { User } from './user';
+
+import { AccessToken, AuthenticationHelper } from './AuthenticationHelper';
+import { User } from './User';
 
 /**
  * A helper class, that handles user authentication over http and web socket connections.
