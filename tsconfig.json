@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitAny": false,
@@ -8,28 +8,13 @@
     "preserveConstEnums": true,
     "sourceMap": true,
     "outDir": "dist",
-    "sourceRoot": "src",
     "declaration": true,
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "lib": [
-      "es5",
-      "es6",
-      "dom",
-      "es2015.core",
-      "es2015.collection",
-      "es2015.generator",
-      "es2015.iterable",
-      "es2015.promise",
-      "es2015.proxy",
-      "es2015.reflect",
-      "es2015.symbol",
-      "es2015.symbol.wellknown",
-      "esnext.asynciterable"
-    ]
+    "experimentalDecorators": true
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "tests/**/*.ts"
   ],
   "exclude": [
     "node_modules",
