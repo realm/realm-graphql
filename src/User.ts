@@ -54,7 +54,18 @@ export class User {
    * @param init The properties on the User you wish to assign.
    */
   public constructor(init: Partial<User>) {
-    Object.assign(this, init);
+    if (typeof init.identity === 'string') {
+      this.identity = init.identity;
+    }
+    if (typeof init.isAdmin === 'boolean') {
+      this.isAdmin = init.isAdmin;
+    }
+    if (typeof init.server === 'string') {
+      this.server = init.server;
+    }
+    if (typeof init.token === 'string') {
+      this.token = init.token;
+    }
   }
 
   /**
