@@ -26,14 +26,14 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "build": "npm run clean && tsc",
+    "build": "npm run clean && tsc -p config/tsconfig.build.json",
     "watch": "tsc --watch",
-    "test": "mocha --opts tests/mocha.opts",
-    "test-watch": "mocha --opts tests/mocha.opts --watch",
+    "test": "mocha --opts config/mocha.opts",
+    "test-watch": "mocha --opts config/mocha.opts --watch",
     "clean": "rm -rf dist",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
     "lint-fix": "tslint -c tslint.json 'src/**/*.ts' --fix",
-    "docs": "node_modules/typedoc/bin/typedoc src"
+    "docs": "typedoc src"
   },
   "devDependencies": {
     "@types/chai": "^4.0.8",
@@ -54,17 +54,21 @@
     "chai-exclude": "^1.0.3",
     "chai-string": "^1.4.0",
     "faker": "^4.1.0",
+    "fs-extra": "^7.0.0",
     "graphql": "^0.11.7",
     "graphql-tag": "^2.5.0",
     "mocha": "^4.0.1",
-    "realm-object-server": "3.0.0",
+    "realm": "^2.15.3",
     "realm-graphql-service": "2.2.0",
+    "realm-object-server": "3.0.0",
     "subscriptions-transport-ws": "^0.9.4",
+    "tmp": "0.0.33",
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
     "tslint-eslint-rules": "^4.1.1",
     "typedoc": "^0.9.0",
     "typescript": "2.5.3",
+    "uuid": "^3.3.2",
     "ws": "^3.3.2"
   },
   "engines": {
@@ -78,6 +82,7 @@
   "dependencies": {
     "apollo-link": "^1.0.5",
     "apollo-link-context": "^1.0.2",
+    "isomorphic-fetch": "^2.2.1",
     "node-fetch": "^2.1.1",
     "urijs": "^1.19.0"
   }

@@ -1,12 +1,21 @@
-import { expect, assert } from 'chai';
+import { assert, expect } from 'chai';
+import { v4 } from 'uuid';
 import { Credentials, User } from '../src';
+import { AuthenticationHelper } from '../src/authenticationHelper';
 import { generateFakeDataRealm } from './generate-fake-data';
 import { GraphQLTestServer } from './GraphQLTestServer';
-import { AuthenticationHelper } from '../src/authenticationHelper';
-import { testServer } from './common';
-import { v4 } from 'uuid';
 
-describe('User', function() {
+describe('User', () => {
+  let testServer: GraphQLTestServer;
+
+  before(async () => {
+    testServer = new GraphQLTestServer();
+    await testServer.start();
+  });
+
+  after(async () => {
+    await testServer.shutdown();
+  });
 
   it('should authenticate with username/password', async () => {
     const credentials = Credentials.usernamePassword(v4(), 'a', true);
@@ -22,17 +31,16 @@ describe('User', function() {
 
       const oldToken = user.token;
       await user.logOut();
-      
+
       expect(user.token).to.be.null;
-      
+
       // Try to reuse the old token;
       user.token = oldToken;
-      
+
       try {
         await AuthenticationHelper.refreshAccessToken(user, `/${user.identity}/foo`);
         assert.fail(undefined, undefined, 'Expected token to be revoked');
-      }
-      catch (e) {
+      } catch (e) {
         expect(e.status).to.be.equal(403);
         expect(e.statusText).to.be.equal('Forbidden');
       }
