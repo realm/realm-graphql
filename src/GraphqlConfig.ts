@@ -1,6 +1,5 @@
 import { ApolloLink } from 'apollo-link';
 import { setContext } from 'apollo-link-context';
-import { setTimeout } from 'timers';
 import * as URI from 'urijs';
 import { AccessToken, AuthenticationHelper } from './authenticationHelper';
 import { User } from './user';
