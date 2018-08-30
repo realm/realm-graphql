@@ -1,7 +1,8 @@
-import { setTimeout } from 'timers';
+import * as isomorphicFetch from 'isomorphic-fetch';
 import * as URI from 'urijs';
-import { Credentials } from './credentials';
-import { User } from './user';
+
+import { Credentials } from './Credentials';
+import { User } from './User';
 
 /**
  * @hidden
@@ -157,20 +158,9 @@ export class AuthenticationHelper {
     }
   }
 
-  private static fetch = AuthenticationHelper.getFetch();
+  private static fetch = isomorphicFetch;
   private static postHeaders = {
     'content-type': 'application/json;charset=utf-8',
     'accept': 'application/json'
   };
-
-  private static getFetch() {
-    if (typeof fetch !== 'undefined') {
-      return fetch.bind(window);
-    }
-    if (this.fetch === undefined) {
-      this.fetch = require('node-fetch');
-    }
-    return this.fetch;
-  }
-
 }

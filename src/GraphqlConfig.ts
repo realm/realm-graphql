@@ -1,22 +1,22 @@
 import { ApolloLink } from 'apollo-link';
 import { setContext } from 'apollo-link-context';
-import { setTimeout } from 'timers';
 import * as URI from 'urijs';
-import { AccessToken, AuthenticationHelper } from './authenticationHelper';
-import { User } from './user';
+
+import { AccessToken, AuthenticationHelper } from './AuthenticationHelper';
+import { User } from './User';
 
 /**
  * A helper class, that handles user authentication over http and web socket connections.
  * It exposes properties that make it easier to setup an Apollo client to communicate with
  * the Realm Object Server GraphQL API.
- * 
+ *
  * **Note**: A single configuration is valid for a single Realm path.
- * 
+ *
  * @example
  * ```js
- * 
+ *
  * const config = await GraphQLConfig.create(user, '/~/foo');
- * 
+ *
  * const httpLink = ApolloLink.concat(
  *   config.authLink,
  *   new HttpLink({ uri: config.httpEndpoint }));
@@ -27,7 +27,7 @@ import { User } from './user';
  *     connectionParams: config.connectionParams
  *   }
  * });
- * 
+ *
  * // Hybrid mode - subscriptions go over websocket,
  * // queries and mutations - over http.
  * const link = split(({ query }) => {
@@ -36,7 +36,7 @@ import { User } from './user';
  *   },
  *   subscriptionLink,
  *   httpLink);
- * 
+ *
  * client = new ApolloClient({
  *   link: link,
  *   cache: new InMemoryCache()
@@ -71,15 +71,15 @@ export class GraphQLConfig {
    * @readonly
    * The http endpoint of the ROS GraphQL API. This is provided for
    * convenience and always resolves to `http://path-to-ros:port/graphql/realmPath`.
-   * 
+   *
    * @example
    * ```
-   * 
+   *
    * const httpLink = createHttpLink({
    *   uri: config.httpEndpoint
    * });
    * ```
-   * 
+   *
    * @see {@link https://www.apollographql.com/docs/link/links/http.html HttpLink docs}.
    */
   public readonly httpEndpoint: string;
@@ -89,10 +89,10 @@ export class GraphQLConfig {
    * The websocket endpoint of the ROS GraphQL subscription API.
    * This is provided for convenience and always resolves to
    * `ws://path-to-ros:port/graphql/realmPath`.
-   * 
+   *
    * @example
    * ```
-   * 
+   *
    * const subscriptionLink = new WebSocketLink({
    *   uri: config.webSocketEndpoint,
    *   options: {
@@ -100,7 +100,7 @@ export class GraphQLConfig {
    *   }
    * });
    * ```
-   * 
+   *
    * @see {@link https://www.apollographql.com/docs/link/links/ws.html WebSocket Link docs}.
    */
   public readonly webSocketEndpoint: string;
@@ -110,14 +110,14 @@ export class GraphQLConfig {
    * A function that generates the connection params that are sent to the ROS
    * GraphQL subscription API. They contain the access token used to authenticate
    * the connection.
-   * 
+   *
    * **Note**: do not invoke the function but instead pass the property directly
    * to the SubscriptionClient's options. This way, the client will be able to
    * invoke it every time a connection is established, thus providing a valid
    * access token every time.
    * @example
    * ```
-   * 
+   *
    * const subscriptionLink = new WebSocketLink({
    *   uri: config.webSocketEndpoint,
    *   options: {
@@ -125,7 +125,7 @@ export class GraphQLConfig {
    *   }
    * });
    * ```
-   * 
+   *
    * @see {@link https://www.apollographql.com/docs/link/links/ws.html WebSocket Link docs}.
    */
   public readonly connectionParams: () => any;
@@ -135,25 +135,27 @@ export class GraphQLConfig {
    * An ApolloLink that handles setting the Authorization header on HTTP
    * request (query and mutation operations). Compose this with an `HttpLink`
    * by calling `ApolloLink.concat` or `ApolloLink.from`.
-   * 
+   *
    * @example
    * ```
-   * 
+   *
    * const httpLink = ApolloLink.concat(
    *   config.authLink,
    *   new HttpLink({ uri: config.httpEndpoint }));
    * ```
-   * 
+   *
    * @see {@link https://www.apollographql.com/docs/link/composition.html Composing Links section}
    * in the Apollo Client docs.
    * @see {@link https://www.apollographql.com/docs/link/links/http.html HttpLink docs}.
    */
   public readonly authLink: ApolloLink;
 
-  private constructor(user: User,
+  private constructor(
+    user: User,
     realmPath: string,
     accessToken: AccessToken,
-    authErrorHandler?: (error: any) => boolean) {
+    authErrorHandler?: (error: any) => boolean
+  ) {
     let token = accessToken.token;
     realmPath = realmPath.replace('/~/', `/${user.identity}/`);
 

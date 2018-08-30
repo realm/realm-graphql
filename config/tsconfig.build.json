@@ -1,0 +1,30 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "target": "es5",
+    "outDir": "../dist",
+    "noResolve": true,
+    "lib": [
+      "dom",
+      "es5",
+      "es2015.promise"
+    ],
+    "types": [
+      "apollo-link",
+      "apollo-link/lib/link",
+      "apollo-link/lib/linkUtils",
+      "apollo-link/lib/types",
+      "apollo-link-context",
+      "zen-observable-ts",
+      "zen-observable-ts/lib/zenObservable",
+      "zen-observable-ts/lib/types",
+      "urijs"
+    ]
+  },
+  "include": [
+    "../src/**/*.ts"
+  ],
+  "exclude": [
+    "../tests/**/*.ts"
+  ]
+}

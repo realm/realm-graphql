@@ -1,34 +1,38 @@
-import { TestServer } from 'realm-object-server';
+import * as fs from 'fs-extra';
+import { resolve } from 'path';
 import { GraphQLService } from 'realm-graphql-service';
-import * as fs from 'fs-extra'
+import { TestServer } from 'realm-object-server';
 import * as tmp from 'tmp';
-import * as path from 'path';
 
 /**
  * A subclass of a Test ROS Server that adds the graphql service by default
  */
 export class GraphQLTestServer extends TestServer {
 
-    constructor() {
-        super();
-        this.addService(new GraphQLService());
-    }
+  private tmpDir;
 
-    public async start(params: any = {}) {
-        await fs.remove('./realm-object-server')
-        await fs.mkdirs('./realm-object-server/io.realm.object-server-utility/metadata/')
+  constructor() {
+    super();
+    this.addService(new GraphQLService());
+  }
 
-        const tmpDir = tmp.dirSync();
-        return super.start(Object.assign({
-            dataPath: tmpDir.name,
-            address: '127.0.0.1',
-            httpsAddress: '127.0.0.1',
-            port: 0,
-        }, params));
-    }
+  public async start(params: any = {}) {
+    this.tmpDir = tmp.dirSync();
+    return super.start({
+      dataPath: this.tmpDir.name,
+      address: '127.0.0.1',
+      httpsAddress: '127.0.0.1',
+      port: 0,
+      ...params
+    });
+  }
 
-    public async shutdown() {
-        await super.shutdown();
-        Realm.Sync.removeAllListeners();
-    }
+  public async shutdown() {
+    await super.shutdown();
+    Realm.Sync.removeAllListeners();
+    // Remove the temporary dir
+    fs.removeSync(this.tmpDir.name);
+    // Remove the "realm-object-server" in the cwd when shutting down the server
+    fs.removeSync(resolve('./realm-object-server'));
+  }
 }
