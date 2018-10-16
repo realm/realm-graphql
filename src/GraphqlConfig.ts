@@ -56,15 +56,24 @@ export class GraphQLConfig {
    * the Realm or due to network issues). If you return `true`, the error will be considered
    * fatal and the request will not be retried. Otherwise, a retry will be attempted after
    * 3 seconds.
+   * @param isQueryBasedSync A boolean, representing whether to connect to a reference Realm
+   * using query based sync. In this mode, query subscriptions must be created before any data
+   * can be returned.
    * @returns A Promise, that, when resolved, contains a fully configured `GraphQLConfig`
    * instance.
    */
   public static async create(
     user: User,
     realmPath: string,
-    authErrorHandler?: (error: any) => boolean) {
-    const accessToken = await AuthenticationHelper.refreshAccessToken(user, realmPath);
-    return new GraphQLConfig(user, realmPath, accessToken, authErrorHandler);
+    authErrorHandler?: (error: any) => boolean,
+    isQueryBasedSync?: boolean) {
+      realmPath = realmPath.replace('/~/', `/${user.identity}/`);
+      if (isQueryBasedSync) {
+        realmPath = `${realmPath}/__partial/${user.identity}/graphql-client`;
+      }
+
+      const accessToken = await AuthenticationHelper.refreshAccessToken(user, realmPath);
+      return new GraphQLConfig(user, realmPath, accessToken, authErrorHandler);
   }
 
   /**
@@ -154,10 +163,9 @@ export class GraphQLConfig {
     user: User,
     realmPath: string,
     accessToken: AccessToken,
-    authErrorHandler?: (error: any) => boolean
+    authErrorHandler?: (error: any) => boolean,
   ) {
     let token = accessToken.token;
-    realmPath = realmPath.replace('/~/', `/${user.identity}/`);
 
     const refresh = (afterDelay: number) => {
       setTimeout(async () => {
