@@ -1,7 +1,15 @@
-import { ApolloLink } from 'apollo-link';
+import { ApolloLink, from, split } from 'apollo-link';
 import { setContext } from 'apollo-link-context';
 import * as URI from 'urijs';
 
+import { ApolloCache } from 'apollo-cache';
+import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
+import ApolloClient from 'apollo-client';
+import { createHttpLink } from 'apollo-link-http';
+import { WebSocketLink } from 'apollo-link-ws';
+import { getMainDefinition } from 'apollo-utilities';
+import * as fetch from 'isomorphic-fetch';
+import ws = require('ws');
 import { AccessToken, AuthenticationHelper } from './AuthenticationHelper';
 import { User } from './User';
 
@@ -226,6 +234,39 @@ export class GraphQLConfig {
           }
         };
       }
+    });
+  }
+
+  public createApolloClient(): ApolloClient<NormalizedCacheObject> {
+    return this.createApolloClientWithCache(new InMemoryCache());
+  }
+
+  public createApolloClientWithCache<TCacheShape>(cache: ApolloCache<TCacheShape>): ApolloClient<TCacheShape> {
+    const httpLink = createHttpLink({
+      uri: this.httpEndpoint,
+      fetch,
+    });
+
+    const subscriptionLink = new WebSocketLink({
+      uri: this.webSocketEndpoint,
+      options: {
+        connectionParams: this.connectionParams,
+        reconnect: true,
+        lazy: true
+      },
+      webSocketImpl: ws,
+    });
+
+    const link = split(({ query }) => {
+        const { kind, operation } = getMainDefinition(query);
+        return kind === 'OperationDefinition' && operation === 'subscription';
+      },
+      subscriptionLink,
+      from([this.authLink, httpLink]));
+
+    return new ApolloClient({
+      link,
+      cache,
     });
   }
 }

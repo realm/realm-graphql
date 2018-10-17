@@ -11,19 +11,12 @@ chai.use(chaiExclude);
 import chaiString = require('chai-string');
 chai.use(chaiString);
 
-import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
+import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import { ApolloClient } from 'apollo-client';
-import { from, split } from 'apollo-link';
-import { onError } from 'apollo-link-error';
-import { createHttpLink } from 'apollo-link-http';
-import { WebSocketLink } from 'apollo-link-ws';
-import { getMainDefinition } from 'apollo-utilities';
 import gql from 'graphql-tag';
-import * as fetch from 'node-fetch';
 import * as Realm from 'realm';
 import { setTimeout } from 'timers';
 import { v4 } from 'uuid';
-import * as ws from 'ws';
 
 import { Credentials, GraphQLConfig, User } from '../src/index';
 import { Company, generateFakeDataRealm } from './generate-fake-data';
@@ -39,6 +32,7 @@ describe('RealmGraphQL', () => {
   let lastCompanyNameLetter: string;
   let helper: GraphQLConfig;
   let testRealm: Realm;
+  let client: ApolloClient<NormalizedCacheObject>;
 
   const ensureSynced = async (direction?: 'download' | 'upload') => {
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -53,6 +47,33 @@ describe('RealmGraphQL', () => {
         },
       );
     });
+  };
+
+  const queryCompanies = async (additionalParameters?: string, expectResults = true): Promise<Company[]> => {
+    const result = await client.query<{companies: Company[]}>({
+      query: gql`
+        query {
+          companies${additionalParameters || ''} {
+            companyId
+            name
+            address
+          }
+        }
+      `,
+      fetchPolicy: 'network-only'
+    });
+
+    if (expectResults) {
+      expect(result.data.companies.length).to.be.above(0);
+    } else {
+      expect(result.data.companies.length).to.equal(0);
+    }
+
+    return result.data.companies;
+  };
+
+  const getCompanyCount = () => {
+    return testRealm.objects('Company').length;
   };
 
   before(async () => {
@@ -70,10 +91,6 @@ describe('RealmGraphQL', () => {
   });
 
   describe('full sync', () => {
-    const getCompanyCount = () => {
-      return testRealm.objects('Company').length;
-    };
-
     before(async () => {
       const realmCredentials = Realm.Sync.Credentials.nickname(userId);
       const realmUser = await Realm.Sync.User.login(serverUrl, realmCredentials);
@@ -119,61 +136,13 @@ describe('RealmGraphQL', () => {
     });
 
     describe('create a client', () => {
-      let client: ApolloClient<NormalizedCacheObject>;
-
-      before(async () => {
-        const httpLink = createHttpLink({
-          uri: helper.httpEndpoint,
-          fetch
-        });
-
-        const subscriptionLink = new WebSocketLink({
-          uri: helper.webSocketEndpoint,
-          options: {
-            connectionParams: helper.connectionParams,
-            reconnect: true,
-            lazy: true
-          },
-          webSocketImpl: ws
-        });
-
-        const link = split(({ query }) => {
-            const { kind, operation } = getMainDefinition(query);
-            return kind === 'OperationDefinition' && operation === 'subscription';
-          },
-          subscriptionLink,
-          from([onError((error) => {
-            // Helpful for debugging purposes
-          }), helper.authLink, httpLink]));
-
-        client = new ApolloClient({
-          link,
-          cache: new InMemoryCache()
-        });
+      before(() => {
+        client = helper.createApolloClient();
       });
 
       describe('and execute query', () => {
-        const queryFunc = async (additionalParameters?: string): Promise<Company[]> => {
-          const result = await client.query<{companies: Company[]}>({
-            query: gql`
-              query {
-                companies${additionalParameters || ''} {
-                  companyId
-                  name
-                  address
-                }
-              }
-            `,
-            fetchPolicy: 'network-only'
-          });
-
-          expect(result.data.companies.length).to.be.above(0);
-
-          return result.data.companies;
-        };
-
         it('should return the entire dataset', async () => {
-          const companies = await queryFunc();
+          const companies = await queryCompanies();
 
           expect(companies.length).to.equal(getCompanyCount());
 
@@ -185,7 +154,7 @@ describe('RealmGraphQL', () => {
         });
 
         it('should return filtered results', async () => {
-          const companies = await queryFunc(`(query: "name BEGINSWITH[c] '${firstCompanyNameLetter}'")`);
+          const companies = await queryCompanies(`(query: "name BEGINSWITH[c] '${firstCompanyNameLetter}'")`);
 
           for (const company of companies) {
             expect(company.name.toUpperCase()).to.startWith(firstCompanyNameLetter);
@@ -193,7 +162,7 @@ describe('RealmGraphQL', () => {
         });
 
         it('should return sorted results', async () => {
-          const companies = await queryFunc(`(sortBy: "name")`);
+          const companies = await queryCompanies(`(sortBy: "name")`);
 
           const expected = companies.slice(0).sort(
             (prev, next) => prev.name.toUpperCase().localeCompare(next.name.toUpperCase())
@@ -207,7 +176,7 @@ describe('RealmGraphQL', () => {
         });
 
         it('should return results sorted descending', async () => {
-          const companies = await queryFunc(`(sortBy: "name", descending: true)`);
+          const companies = await queryCompanies(`(sortBy: "name", descending: true)`);
 
           const expected = companies.slice(0).sort(
             (prev, next) => next.name.toUpperCase().localeCompare(prev.name.toUpperCase())
@@ -221,7 +190,7 @@ describe('RealmGraphQL', () => {
         });
 
         it('should skip records', async () => {
-          const companies = await queryFunc(`(sortBy: "name", skip: 100)`);
+          const companies = await queryCompanies(`(sortBy: "name", skip: 100)`);
 
           // This is a bit optimistic, but expect that the random distribution
           // won't be skewed toward either end.
@@ -234,14 +203,14 @@ describe('RealmGraphQL', () => {
         });
 
         it('should limit the returned results', async () => {
-          const companies = await queryFunc(`(sortBy: "name", take: 100)`);
+          const companies = await queryCompanies(`(sortBy: "name", take: 100)`);
 
           expect(companies.length).to.equal(100);
           expect(companies[0].name.toUpperCase()).to.startWith(firstCompanyNameLetter);
         });
 
         it('should paginate the result', async () => {
-          const companies = await queryFunc(`(sortBy: "name", skip: 90, take: 20)`);
+          const companies = await queryCompanies(`(sortBy: "name", skip: 90, take: 20)`);
 
           expect(companies.length).to.equal(20);
           expect(companies[0].name.toUpperCase()).to.not.startWith(firstCompanyNameLetter);
@@ -702,6 +671,36 @@ describe('RealmGraphQL', () => {
       expect(helper.connectionParams).to.be.a('function');
       expect(helper.connectionParams).to.exist;
       expect(helper.connectionParams()).to.be.not.empty;
+    });
+
+    describe('create a client', () => {
+      before(() => {
+        client = helper.createApolloClient();
+      });
+
+      it('subscription test', async () => {
+        // Before a subscription - expect the Realm to be empty
+        const companiesBeforeSubscribe = await queryCompanies(undefined, /* expectResults */ false);
+        expect(companiesBeforeSubscribe.length).to.equal(0);
+
+        const result = await client.mutate<{companies: Company[]}>({
+          mutation: gql`
+            mutation {
+              companies: createCompanySubscription {
+                companyId
+                name
+                address
+              }
+            }
+          `
+        });
+
+        expect(result.data.companies.length).to.equal(getCompanyCount());
+
+        // After subscription - expect the Realm to have data
+        const companiesAfterSubscribe = await queryCompanies();
+        expect(companiesAfterSubscribe.length).to.equal(getCompanyCount());
+      });
     });
   });
 });
