@@ -3,7 +3,8 @@
   "compilerOptions": {
     "target": "es5",
     "outDir": "../dist",
-    "noResolve": true,
+    "noResolve": false,
+    "skipLibCheck": true,
     "lib": [
       "dom",
       "es5",

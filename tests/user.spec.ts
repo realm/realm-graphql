@@ -2,7 +2,6 @@ import { assert, expect } from 'chai';
 import { v4 } from 'uuid';
 import { Credentials, User } from '../src';
 import { AuthenticationHelper } from '../src/authenticationHelper';
-import { generateFakeDataRealm } from './generate-fake-data';
 import { GraphQLTestServer } from './GraphQLTestServer';
 
 describe('User', () => {

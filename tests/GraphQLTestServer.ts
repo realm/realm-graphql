@@ -32,7 +32,5 @@ export class GraphQLTestServer extends TestServer {
     Realm.Sync.removeAllListeners();
     // Remove the temporary dir
     fs.removeSync(this.tmpDir.name);
-    // Remove the "realm-object-server" in the cwd when shutting down the server
-    fs.removeSync(resolve('./realm-object-server'));
   }
 }
