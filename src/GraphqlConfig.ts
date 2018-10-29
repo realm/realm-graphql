@@ -9,7 +9,7 @@ import { createHttpLink } from 'apollo-link-http';
 import { WebSocketLink } from 'apollo-link-ws';
 import { getMainDefinition } from 'apollo-utilities';
 import * as fetch from 'isomorphic-fetch';
-import ws = require('ws');
+import * as ws from 'isomorphic-ws';
 import { AccessToken, AuthenticationHelper } from './AuthenticationHelper';
 import { User } from './User';
 
