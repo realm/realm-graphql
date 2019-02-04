@@ -1,3 +1,17 @@
+# Release x.y.z (yyyy-MM-dd)
+
+### Enhancements
+* None
+
+### Fixed
+* None
+
+### Compatibility
+* Compatible with all ROS 3.x releases.
+
+### Internals
+* None
+
 # Release 1.4.0 (2019-02-04)
 
 ### Enhancements
