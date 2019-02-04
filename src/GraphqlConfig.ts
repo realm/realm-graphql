@@ -6,10 +6,12 @@ import { ApolloCache } from 'apollo-cache';
 import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import { createHttpLink } from 'apollo-link-http';
+import { RetryLink } from 'apollo-link-retry';
 import { WebSocketLink } from 'apollo-link-ws';
 import { getMainDefinition } from 'apollo-utilities';
 import * as fetch from 'isomorphic-fetch';
 import * as ws from 'isomorphic-ws';
+import { ConnectionParams } from 'subscriptions-transport-ws';
 import { AccessToken, AuthenticationHelper } from './AuthenticationHelper';
 import { User } from './User';
 
@@ -145,7 +147,7 @@ export class GraphQLConfig {
    *
    * @see {@link https://www.apollographql.com/docs/link/links/ws.html WebSocket Link docs}.
    */
-  public readonly connectionParams: () => any;
+  public readonly connectionParams: () => ConnectionParams;
 
   /**
    * @readonly
@@ -167,36 +169,25 @@ export class GraphQLConfig {
    */
   public readonly authLink: ApolloLink;
 
+  private readonly user: User;
+  private readonly authErrorHandler: (error: any) => boolean;
+  private readonly realmPath: string;
+  private token: string;
+
   private constructor(
     user: User,
     realmPath: string,
     accessToken: AccessToken,
     authErrorHandler?: (error: any) => boolean,
   ) {
-    let token = accessToken.token;
+    this.user = user;
+    this.authErrorHandler = authErrorHandler;
+    this.realmPath = realmPath;
 
-    const refresh = (afterDelay: number) => {
-      setTimeout(async () => {
-        if (!user.token) {
-          // User logged out, stop refreshing
-          return;
-        }
-
-        try {
-          const result = await AuthenticationHelper.refreshAccessToken(user, realmPath);
-          token = result.token;
-
-          refresh(result.expires - Date.now() - 10000);
-        } catch (e) {
-          if (!authErrorHandler || !authErrorHandler(e)) {
-            refresh(3000);
-          }
-        }
-      }, afterDelay);
-    };
+    this.token = accessToken.token;
 
     if (accessToken.expires) {
-      refresh(accessToken.expires - Date.now() - 10000);
+      this.refreshToken(accessToken.expires - Date.now() - 10000);
     }
 
     const graphQLEndpoint = new URI(user.server).segmentCoded(['graphql', realmPath]);
@@ -216,9 +207,9 @@ export class GraphQLConfig {
 
     this.webSocketEndpoint = graphQLEndpoint.clone().scheme(subscriptionScheme).toString();
     this.connectionParams = () => {
-      if (token) {
+      if (this.token) {
         return {
-          token
+          token: this.token,
         };
       }
 
@@ -226,21 +217,30 @@ export class GraphQLConfig {
     };
 
     this.authLink = setContext((_, { headers }) => {
-      if (token) {
+      if (this.token) {
         return {
           headers: {
             ...headers,
-            authorization: token
-          }
+            authorization: this.token,
+          },
         };
       }
     });
   }
 
+  /**
+   * Creates an Apollo client with InMemoryCache. The client will be configured with
+   * an http link for query and mutation operations and a websocket link for subscriptions.
+   */
   public createApolloClient(): ApolloClient<NormalizedCacheObject> {
     return this.createApolloClientWithCache(new InMemoryCache());
   }
 
+  /**
+   * Creates an Apollo client with the specified cache. The client will be configured with
+   * an http link for query and mutation operations and a websocket link for subscriptions.
+   * @param cache The cache that the Apollo client will use.
+   */
   public createApolloClientWithCache<TCacheShape>(cache: ApolloCache<TCacheShape>): ApolloClient<TCacheShape> {
     const httpLink = createHttpLink({
       uri: this.httpEndpoint,
@@ -252,9 +252,26 @@ export class GraphQLConfig {
       options: {
         connectionParams: this.connectionParams,
         reconnect: true,
-        lazy: true
+        lazy: true,
       },
       webSocketImpl: ws,
+    });
+
+    const retryLink = new RetryLink({
+      delay: {
+        initial: 100,
+        max: 5000,
+      },
+      attempts: {
+        max: 3,
+        retryIf: async (error) => {
+          if (error && error.result && error.result.status === 401) {
+            await this.refreshToken(0, /* shouldRetry */ false);
+          }
+
+          return true;
+        },
+      },
     });
 
     const link = split(({ query }) => {
@@ -262,11 +279,53 @@ export class GraphQLConfig {
         return kind === 'OperationDefinition' && operation === 'subscription';
       },
       subscriptionLink,
-      from([this.authLink, httpLink]));
+      from([retryLink, this.authLink, httpLink]));
 
     return new ApolloClient({
       link,
       cache,
+    });
+  }
+
+  /**
+   * Forces a refresh of the user's access token. Tokens are refreshed automatically
+   * 10 seconds before they expire. Since that relies on a javascript timer, it's
+   * possible that the token isn't proactively refreshed, for example, because the
+   * app was suspended for some time.
+   * @param afterDelay Delay to wait before refreshing the token.
+   * @param shouldRetry A boolean parameter that controls whether to retry the request on error.
+   */
+  public async refreshToken(afterDelay: number, shouldRetry = true): Promise<boolean> {
+    await this.delay(afterDelay);
+
+    if (!this.user.token) {
+      // User logged out, stop refreshing
+      return false;
+    }
+
+    try {
+      const result = await AuthenticationHelper.refreshAccessToken(this.user, this.realmPath);
+      this.token = result.token;
+
+      this.refreshToken(result.expires - Date.now() - 10000);
+      return true;
+    } catch (e) {
+      if (this.authErrorHandler) {
+        // Always report the error, even if we're not retrying
+        shouldRetry = !this.authErrorHandler(e) && shouldRetry;
+      }
+
+      if (shouldRetry) {
+        return this.refreshToken(3000);
+      }
+    }
+
+    return false;
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
     });
   }
 }

@@ -17,15 +17,19 @@
     ],
     "quotemark": [
       true,
-      "single"
+      "double"
     ],
     "trailing-comma": {
-      "multiline": "never",
-      "singleline": "never"
+      "options": {
+        "multiline": "always",
+        "singleline": "never",
+        "esSpecCompliant": true
+      }
     },
     "interface-name": [
       true,
       "never-prefix"
-    ]
+    ],
+    "no-string-literal": false
   }
 }
