@@ -10,7 +10,7 @@ export class Credentials {
   public static facebook(facebookToken: string): Credentials {
     return {
       data: facebookToken,
-      provider: 'facebook',
+      provider: "facebook",
     };
   }
 
@@ -22,7 +22,7 @@ export class Credentials {
   public static google(googleToken: string): Credentials {
     return {
       data: googleToken,
-      provider: 'google'
+      provider: "google",
     };
   }
 
@@ -36,11 +36,11 @@ export class Credentials {
   public static usernamePassword(username: string, password: string, createUser?: boolean): Credentials {
     return {
       data: username,
-      provider: 'password',
+      provider: "password",
       user_info: {
         register: createUser || false,
-        password
-      }
+        password,
+      },
     };
   }
 
@@ -52,7 +52,7 @@ export class Credentials {
   public static azureAD(adToken: string): Credentials {
     return {
       data: adToken,
-      provider: 'azuread'
+      provider: "azuread",
     };
   }
 
@@ -66,7 +66,7 @@ export class Credentials {
   public static jwt(jwtToken: string): Credentials {
     return {
       data: jwtToken,
-      provider: 'jwt'
+      provider: "jwt",
     };
   }
 
@@ -79,7 +79,7 @@ export class Credentials {
   public static admin(adminToken: string): Credentials {
     return {
       data: adminToken,
-      provider: '__admin'
+      provider: "__admin",
     };
   }
 
@@ -91,7 +91,7 @@ export class Credentials {
   public static anonymous(): Credentials {
     return {
       data: null,
-      provider: '__anonymous'
+      provider: "__anonymous",
     };
   }
 
@@ -103,13 +103,12 @@ export class Credentials {
   public static nickname(nickname: string, isAdmin: boolean = false): Credentials {
     return {
       data: nickname,
-      provider: 'nickname',
+      provider: "nickname",
       user_info: {
-        is_admin: isAdmin
-      }
+        is_admin: isAdmin,
+      },
     };
   }
-  
 
   /**
    * Creates Credentials based on a login with a custom system.
@@ -125,7 +124,7 @@ export class Credentials {
     return {
       provider,
       data: token,
-      user_info: userInfo
+      user_info: userInfo,
     };
   }
 

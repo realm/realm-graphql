@@ -1,19 +1,19 @@
-import { ApolloLink, from, split } from 'apollo-link';
-import { setContext } from 'apollo-link-context';
-import * as URI from 'urijs';
+import { ApolloLink, from, split } from "apollo-link";
+import { setContext } from "apollo-link-context";
+import * as URI from "urijs";
 
-import { ApolloCache } from 'apollo-cache';
-import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
-import ApolloClient from 'apollo-client';
-import { createHttpLink } from 'apollo-link-http';
-import { RetryLink } from 'apollo-link-retry';
-import { WebSocketLink } from 'apollo-link-ws';
-import { getMainDefinition } from 'apollo-utilities';
-import * as fetch from 'isomorphic-fetch';
-import * as ws from 'isomorphic-ws';
-import { ConnectionParams } from 'subscriptions-transport-ws';
-import { AccessToken, AuthenticationHelper } from './AuthenticationHelper';
-import { User } from './User';
+import { ApolloCache } from "apollo-cache";
+import { InMemoryCache, NormalizedCacheObject } from "apollo-cache-inmemory";
+import ApolloClient from "apollo-client";
+import { createHttpLink } from "apollo-link-http";
+import { RetryLink } from "apollo-link-retry";
+import { WebSocketLink } from "apollo-link-ws";
+import { getMainDefinition } from "apollo-utilities";
+import * as fetch from "isomorphic-fetch";
+import * as ws from "isomorphic-ws";
+import { ConnectionParams } from "subscriptions-transport-ws";
+import { AccessToken, AuthenticationHelper } from "./AuthenticationHelper";
+import { User } from "./User";
 
 /**
  * A helper class, that handles user authentication over http and web socket connections.
@@ -77,7 +77,7 @@ export class GraphQLConfig {
     realmPath: string,
     authErrorHandler?: (error: any) => boolean,
     isQueryBasedSync?: boolean) {
-      realmPath = realmPath.replace('/~/', `/${user.identity}/`);
+      realmPath = realmPath.replace("/~/", `/${user.identity}/`);
       if (isQueryBasedSync) {
         realmPath = `${realmPath}/__partial/${user.identity}/graphql-client`;
       }
@@ -190,16 +190,16 @@ export class GraphQLConfig {
       this.refreshToken(accessToken.expires - Date.now() - 10000);
     }
 
-    const graphQLEndpoint = new URI(user.server).segmentCoded(['graphql', realmPath]);
+    const graphQLEndpoint = new URI(user.server).segmentCoded(["graphql", realmPath]);
     this.httpEndpoint = graphQLEndpoint.toString();
 
     let subscriptionScheme: string;
     switch (graphQLEndpoint.scheme()) {
-      case 'http':
-        subscriptionScheme = 'ws';
+      case "http":
+        subscriptionScheme = "ws";
         break;
-      case 'https':
-        subscriptionScheme = 'wss';
+      case "https":
+        subscriptionScheme = "wss";
         break;
       default:
         throw new Error(`Unrecognized scheme for the server endpoint: ${graphQLEndpoint.scheme()}`);
@@ -276,7 +276,7 @@ export class GraphQLConfig {
 
     const link = split(({ query }) => {
         const { kind, operation } = getMainDefinition(query);
-        return kind === 'OperationDefinition' && operation === 'subscription';
+        return kind === "OperationDefinition" && operation === "subscription";
       },
       subscriptionLink,
       from([retryLink, this.authLink, httpLink]));

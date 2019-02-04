@@ -1,3 +1,3 @@
-export * from './GraphqlConfig';
-export * from './Credentials';
-export * from './User';
+export * from "./GraphqlConfig";
+export * from "./Credentials";
+export * from "./User";
