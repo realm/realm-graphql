@@ -8,10 +8,10 @@ The Realm GraphQL client provides a few helper and convenience API to make it ea
 
 ### Prerequisites
 
-Add the [apollo-client-preset](https://www.npmjs.com/package/apollo-client-preset), [apollo-link-ws](https://www.npmjs.com/package/apollo-link-ws), and [subscriptions-transport-ws](https://www.npmjs.com/package/subscriptions-transport-ws) packages to your project:
+Add the [apollo-link](https://www.npmjs.com/package/apollo-link), [apollo-link-http](https://www.npmjs.com/package/apollo-link-http), [apollo-link-ws](https://www.npmjs.com/package/apollo-link-ws), and [subscriptions-transport-ws](https://www.npmjs.com/package/subscriptions-transport-ws) packages to your project:
 
 ```
-npm install graphql apollo-client-preset apollo-link-ws apollo-utilities subscriptions-transport-ws --save
+npm install graphql apollo-link apollo-link-http apollo-link-ws apollo-utilities subscriptions-transport-ws --save
 ```
 
 Then, add the Realm GraphQL client package:
@@ -65,7 +65,8 @@ WebSocketLink's constructor's options.
 Let's look at a small example. First, let's configure the `httpLink` that we'll use for querying and mutating:
 
 ```ts
-import { concat, HttpLink } from 'apollo-client-preset';
+import { HttpLink } from 'apollo-link-http';
+import { concat } from 'apollo-link';
 
 const httpLink = concat(
     config.authLink,
@@ -91,7 +92,7 @@ const webSocketLink = new WebSocketLink({
 Finally, we need to use [split](https://www.apollographql.com/docs/link/composition.html#directional) to direct subscriptions to the websocket link and queries and mutations to the http link:
 
 ```ts
-import { split } from 'apollo-client-preset';
+import { split } from 'apollo-link';
 import { getMainDefinition } from 'apollo-utilities';
 
 const link = split(
