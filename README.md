@@ -1,5 +1,7 @@
 # Realm GraphQL Client
 
+With the introduction of [MongoDB Realm](https://www.mongodb.com/realm), this package is **deprecated**. Please use [MongoDB Realm Cloud](https://docs.mongodb.com/realm/) and the [GraphQL API](https://docs.mongodb.com/realm/graphql/).
+
 A set of helper methods and classes to make it easier to use the Apollo GraphQL client with the Realm Object Server.
 
 ## Using the Client
@@ -40,7 +42,7 @@ After you have your user, you can create a helper config that will handle token 
 ```ts
 import { GraphQLConfig } from 'realm-graphql-client';
 
-const config = await GraphQLConfig.create( 
+const config = await GraphQLConfig.create(
   user,
   '/~/test'
 );
@@ -233,7 +235,7 @@ After `npm install`
 ### Debugging with Visual Studio Code
 
 1. Set a breakpoint in your code ending in `.ts` or your test ending in `.spec.ts`
-2. Run Either `src/index.ts` or `All Tests` in the debug pane. 
+2. Run Either `src/index.ts` or `All Tests` in the debug pane.
 
 ### Some Advice
 
