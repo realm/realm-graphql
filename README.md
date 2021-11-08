@@ -1,6 +1,8 @@
-# Realm GraphQL Client
-
+# DEPRECATED
 With the introduction of [MongoDB Realm](https://www.mongodb.com/realm), this package is **deprecated**. Please use [MongoDB Realm Cloud](https://docs.mongodb.com/realm/) and the [GraphQL API](https://docs.mongodb.com/realm/graphql/).
+
+-----
+# Realm GraphQL Client
 
 A set of helper methods and classes to make it easier to use the Apollo GraphQL client with the Realm Object Server.
 
